@@ -1,6 +1,6 @@
 # trodi
 
-Add a short description here!
+Label outliers on InSAR pixels or whole interferograms
 
 
 ## Description

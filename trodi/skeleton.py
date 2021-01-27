@@ -21,9 +21,6 @@ import sys
 
 from trodi import __version__
 
-__author__ = "scott"
-__copyright__ = "scott"
-__license__ = "mit"
 
 _logger = logging.getLogger(__name__)
 
@@ -99,8 +96,6 @@ def main(args):
     """
     args = parse_args(args)
     setup_logging(args.loglevel)
-    _logger.debug("Starting crazy calculations...")
-    print("The {}-th Fibonacci number is {}".format(args.n, fib(args.n)))
     _logger.info("Script ends here")
 
 
