@@ -41,9 +41,13 @@ def mad(stack, axis=0):
     return median_abs_deviation(stack, scale=1 / 1.4826, nan_policy="omit", axis=axis)
 
 
-def label_outliers(stack, nsigma=4, axis=0):
-    threshold_img = nsigma * mad(np.abs(stack))
-    return stack > threshold_img
+def label_outliers(stack, nsigma=5, axis=0, min_spread=0.5):
+    stack_abs = np.abs(stack)
+    median_img = stack_abs.median(axis=axis)
+    spread = np.maximum(min_spread, nsigma * mad(stack_abs))
+    threshold_img = median_img + spread
+
+    return stack_abs > threshold_img
 
 
 @log_runtime
