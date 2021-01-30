@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """
-Averages all unwrapped igrams, making images of the averge phase per date
+Create labels of outlier interferogram pixels.
+
+Uses the averaged unwrapped igrams per date.
 """
 import numpy as np
 

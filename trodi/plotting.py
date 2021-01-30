@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def plot_avgs(fname="average_slcs.nc", stack=None, cmap=None, nimg=9):
     import xarray as xr
 
