@@ -48,8 +48,10 @@ def get_cli_args():
 
 def create_labels():
     args = get_cli_args()
-    avg_file = average_igrams.create_averages(**vars(args))
-    average_igrams.label_outliers(fname=avg_file, outfile=args.outfile)
+    arg_dict = vars(args)
+    arg_dict["outfile"] = "average_slcs.nc"
+    avg_slc_file = average_igrams.create_averages(**arg_dict)
+    average_igrams.label_outliers(fname=avg_slc_file, outfile=args.outfile)
     # args.deramp,
     # args.ext,
     # search_path=args.search_path,
