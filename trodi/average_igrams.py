@@ -6,7 +6,8 @@ Averages all unwrapped igrams, making images of the averge phase per date
 import numpy as np
 import argparse
 
-from scipy.stats import median_abs_deviation
+# faster on nans
+from bottleneck import median
 
 from . import utils
 from . import sario
@@ -14,55 +15,81 @@ from .logger import get_log, log_runtime
 from .deramp import remove_ramp
 
 log = get_log()
-"""
-# TODO: once averaged... just need to label the idxs which are more than n-sigma above the median
-means = mean_abs_val(geo, int, val)
-out_idxs = two_way_outliers(means, nsigma, min_spread)
-
-mednsigma(arr, n = 4) = n * mad(arr, normalize = true)
-
-    function two_way_cutoff(arr, nsigma, min_spread = 0)
-    # min_spread = abs(2 * median(arr))
-    # spread = 1.5 * iqr(arr)
-    spread = max(min_spread, mednsigma(arr, nsigma))
-    #@show spread
-    # spread = max(min_spread, std(arr)*nsigma)
-    #@show std(arr)*nsigma
-
-    # Make we dont cut off very low var points
-    low = min(0, median(arr) - spread)
-    high = median(arr) + spread
-    return (low, high)
-end
-"""
 
 
-def mad(stack, axis=0):
-    return median_abs_deviation(stack, scale=1 / 1.4826, nan_policy="omit", axis=axis)
+def mad(stack, axis=0, scale=1.4826):
+    """Median absolute deviation,
+
+    default is scaled such that +/-MAD covers 50% (between 1/4 and 3/4)
+    of the standard normal cumulative distribution
+    """
+    stack_abs = np.abs(stack)
+    med = median(stack_abs, axis=0)
+    return scale * median(np.abs(stack_abs - med), axis=axis)
 
 
-def label_outliers(stack, nsigma=5, axis=0, min_spread=0.5):
+def label_outliers(
+    fname=None,
+    stack=None,
+    outfile="labels.nc",
+    nsigma=5,
+    axis=0,
+    min_spread=0.5,
+):
+    # TODO: out of core? worth doing?
+    if stack is None:
+        import xarray as xr
+
+        stack = xr.open_dataarray(fname)
+
     stack_abs = np.abs(stack)
     median_img = stack_abs.median(axis=axis)
     spread = np.maximum(min_spread, nsigma * mad(stack_abs))
     threshold_img = median_img + spread
 
-    return stack_abs > threshold_img
+    labels = stack_abs > threshold_img
+    if outfile:
+        log.info("Saving outlier labels to " + outfile)
+        labels.to_netcdf(outfile)
+    return labels
 
 
 @log_runtime
 def create_averages(
-    deramp,
-    ext,
     search_path=".",
+    ext=".unw",
     rsc_file=None,
+    deramp=True,
+    outfile="average_slcs.nc",
     overwrite=False,
     normalize_time=False,
     band=2,
-    outfile="average_slcs.nc",
     ds_name="igrams",
     **kwargs,
 ):
+    """Create a NetCDF stack of "average interferograms" for each date
+
+    Args:
+        search_path (str):
+            directory to find igrams
+        ext (str):
+            extension name of unwrapped interferograms (default = .unw)
+        rsc_file (str):
+            filename of .rsc resource file, if loading binary files like snaphu outputs
+        deramp (bool):
+            remove a linear ramp from unwrapped igrams when averaging
+        outfile (str):
+            name of output file to save stack
+        overwrite (bool):
+            clobber current output file, if exists
+        normalize_time (bool):
+            Divide igram phase by temporal baseline (default = false)
+            true: units = [rad / day], false: units = [rad]
+        band (int):
+            if using rasterio to load igrams, which image band to load
+        ds_name (str):
+            Name of the data variable used in the netcdf stack
+    """
 
     import netCDF4 as nc
 
@@ -140,40 +167,7 @@ def create_averages(
 
     # Close to save it
     f.close()
-
-
-def plot_avgs(fname="average_slcs.nc", stack=None, cmap=None, nimg=9):
-    import xarray as xr
-
-    # import matplotlib.pyplot as plt
-    if stack is None:
-        with xr.open_dataarray(fname) as ds:
-            stack = ds[:nimg]
-    else:
-        stack = stack[:nimg]
-
-    # vmin, vmax = np.nanmin(avgs), np.nanmax(avgs)
-    # vm = np.max(np.abs([vmin, vmax]))
-    ntotal = stack.shape[0]
-    ntiles = nimg if nimg < ntotal else ntotal
-
-    nside = int(np.ceil(np.sqrt(ntiles)))
-    stack.plot(
-        x="lon",
-        y="lat",
-        col="date",
-        col_wrap=nside,
-        cmap=cmap,
-        # vmax=np.percentile(ds.data, 95),
-        # cmap="gray",
-        #     cmap="discrete_seismic7",
-    )
-    # fig, axes = plt.subplots(nside, nside)
-    # for (avg, ax, fn) in zip(avgs, axes.ravel(), fnames):
-    # axim = ax.imshow(avg, vmin=-vm, vmax=vm, cmap=cmap)
-    # ax.set_title(f"{fn}: {np.var(avg):.2f}")
-    # fig.colorbar(axim, ax=ax)
-    # return fig, axes
+    return outfile
 
 
 def get_cli_args():
@@ -196,6 +190,12 @@ def get_cli_args():
         help="location of igram files. (default=%(default)s)",
     )
     p.add_argument(
+        "--outfile",
+        "-o",
+        default="labels.nc",
+        help="Location to save final labels (default=%(default)s)",
+    )
+    p.add_argument(
         "--rsc-file", help="If using ROI_PAC .rsc files, location of .rsc file"
     )
     p.add_argument(
@@ -216,7 +216,8 @@ def get_cli_args():
 
 def run_create_averages():
     args = get_cli_args()
-    create_averages(**vars(args))
+    avg_file = create_averages(**vars(args))
+    label_outliers(fname=avg_file, outfile=args.outfile)
     # args.deramp,
     # args.ext,
     # search_path=args.search_path,

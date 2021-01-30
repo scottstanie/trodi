@@ -7,4 +7,5 @@ dependencies:
   - pip
   - numpy
   - xarray
-  - h5netcdf
+  - netCDF4
+  - bottleneck
