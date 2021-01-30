@@ -10,4 +10,4 @@ except DistributionNotFound:
 finally:
     del get_distribution, DistributionNotFound
 
-from core import label_outliers, average_igrams
+from .core import label_outliers, create_averages
