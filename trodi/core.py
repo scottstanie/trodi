@@ -24,7 +24,7 @@ def mad(stack, axis=0, scale=1.4826):
     of the standard normal cumulative distribution
     """
     stack_abs = np.abs(stack)
-    med = median(stack_abs, axis=0)
+    med = median(stack_abs, axis=axis)
     return scale * median(np.abs(stack_abs - med), axis=axis)
 
 
@@ -33,7 +33,7 @@ def label_outliers(
     stack=None,
     outfile="labels.nc",
     nsigma=5,
-    axis=0,
+    level="pixel",
     min_spread=0.5,
 ):
     # TODO: out of core? worth doing?
@@ -42,16 +42,44 @@ def label_outliers(
 
         stack = xr.open_dataarray(fname)
 
-    stack_abs = np.abs(stack)
-    median_img = stack_abs.median(axis=axis)
-    spread = np.maximum(min_spread, nsigma * mad(stack_abs))
-    threshold_img = median_img + spread
+    if level == "pixel":
+        labels = label_pixels(stack, nsigma=nsigma, min_spread=min_spread)
+    elif level == "scene":
+        labels = label_scenes(stack, nsigma=nsigma, min_spread=min_spread)
+    else:
+        raise ValueError("`level` must be 'pixel' or 'scene'")
 
-    labels = stack_abs > threshold_img
     if outfile:
         log.info("Saving outlier labels to " + outfile)
         labels.to_netcdf(outfile)
     return labels
+
+
+def label_pixels(
+    stack,
+    nsigma=5,
+    min_spread=0.5,
+):
+    stack_abs = np.abs(stack)
+    median_img = stack_abs.median(axis=0)
+    spread = np.maximum(min_spread, nsigma * mad(stack_abs))
+    threshold_img = median_img + spread
+
+    return stack_abs > threshold_img
+
+
+def label_scenes(
+    stack,
+    nsigma=5,
+    min_spread=0.5,
+):
+    # out shape: (ndates, 1, 1)
+    stack_var = np.var(stack, axis=(1, 2), keepdims=True)
+
+    median_var = stack_var.median(axis=0)
+    spread = np.maximum(min_spread, nsigma * mad(stack_var, axis=0))
+    threshold_var = median_var + spread
+    return (stack_var > threshold_var).squeeze()
 
 
 @log_runtime
