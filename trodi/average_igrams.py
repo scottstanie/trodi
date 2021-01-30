@@ -2,13 +2,11 @@
 """
 Averages all unwrapped igrams, making images of the averge phase per date
 """
-import glob
-
 # import h5py
 import numpy as np
 import argparse
 
-# from scipy.stats import median_abs_deviation
+from scipy.stats import median_abs_deviation
 
 from . import utils
 from . import sario
@@ -38,12 +36,14 @@ mednsigma(arr, n = 4) = n * mad(arr, normalize = true)
 end
 """
 
-# def mad
-# median_abs_deviation(
-# x,
-# scale=1 / 1.4826,
-# nan_policy="omit",
-# )
+
+def mad(stack, axis=0):
+    return median_abs_deviation(stack, scale=1 / 1.4826, nan_policy="omit", axis=axis)
+
+
+def label_outliers(stack, nsigma=4, axis=0):
+    threshold_img = nsigma * mad(np.abs(stack))
+    return stack > threshold_img
 
 
 @log_runtime
@@ -131,39 +131,39 @@ def create_averages(
         else:
             out[out_mask] = np.nan
 
-        import ipdb
-
-        # ipdb.set_trace()
         # Write the single layer out
         ds[idx, :, :] = out
 
-    # ipdb.set_trace()
     # Close to save it
     f.close()
 
 
-def plot_avgs(fname="average_slcs.nc", cmap="seismic", nimg=9):
+def plot_avgs(fname="average_slcs.nc", stack=None, cmap=None, nimg=9):
     import xarray as xr
 
     # import matplotlib.pyplot as plt
-    ds = xr.open_dataarray(fname)
+    if stack is None:
+        with xr.open_dataarray(fname) as ds:
+            stack = ds[:nimg]
+    else:
+        stack = stack[:nimg]
 
     # vmin, vmax = np.nanmin(avgs), np.nanmax(avgs)
     # vm = np.max(np.abs([vmin, vmax]))
-    with xr.open_dataarray(fname) as ds:
-        ntotal = ds.shape[0]
-        ntiles = nimg if nimg < ntotal else ntotal
+    ntotal = stack.shape[0]
+    ntiles = nimg if nimg < ntotal else ntotal
 
-        nside = int(np.ceil(np.sqrt(ntiles)))
-        ds.plot(
-            x="lon",
-            y="lat",
-            col="date",
-            col_wrap=nside,
-            # vmax=np.percentile(ds.data, 95),
-            # cmap="gray",
-            #     cmap="discrete_seismic7",
-        )
+    nside = int(np.ceil(np.sqrt(ntiles)))
+    stack.plot(
+        x="lon",
+        y="lat",
+        col="date",
+        col_wrap=nside,
+        cmap=cmap,
+        # vmax=np.percentile(ds.data, 95),
+        # cmap="gray",
+        #     cmap="discrete_seismic7",
+    )
     # fig, axes = plt.subplots(nside, nside)
     # for (avg, ax, fn) in zip(avgs, axes.ravel(), fnames):
     # axim = ax.imshow(avg, vmin=-vm, vmax=vm, cmap=cmap)
