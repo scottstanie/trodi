@@ -4,6 +4,7 @@ Create labels of outlier interferogram pixels.
 
 Uses the averaged unwrapped igrams per date.
 """
+import os
 import numpy as np
 
 # faster on nans
@@ -118,8 +119,11 @@ def create_averages(
         ds_name (str):
             Name of the data variable used in the netcdf stack
     """
-
     import netCDF4 as nc
+
+    if os.path.exists(outfile) and not overwrite:
+        log.info("{} exists, not overwriting.")
+        return outfile
 
     log.info("Searching for igrams in {} with extention {}".format(search_path, ext))
     ifg_date_list = utils.find_igrams(directory=search_path, ext=ext)

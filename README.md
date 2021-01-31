@@ -7,7 +7,7 @@ Label outliers on InSAR pixels or whole interferograms
 
 
 ```
-$ time trodi --rsc-file dem.rsc
+$ time trodi --rsc-file dem.rsc --level pixel
 [01/29 19:01:58] [INFO core.py] Searching for igrams in . with extention .unw
 [01/29 19:01:58] [INFO core.py] Found 5282 igrams, 111 unique SAR dates
 [01/29 19:01:58] [INFO utils.py] Making dimensions and variables
