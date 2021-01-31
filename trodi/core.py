@@ -18,17 +18,6 @@ from .deramp import remove_ramp
 log = get_log()
 
 
-def mad(stack, axis=0, scale=1.4826):
-    """Median absolute deviation,
-
-    default is scaled such that +/-MAD covers 50% (between 1/4 and 3/4)
-    of the standard normal cumulative distribution
-    """
-    stack_abs = np.abs(stack)
-    med = median(stack_abs, axis=axis)
-    return scale * median(np.abs(stack_abs - med), axis=axis)
-
-
 def label_outliers(
     fname=None,
     stack=None,
@@ -70,10 +59,21 @@ def label(
     nsigma=5,
     min_spread=0.5,
 ):
-    med = data.median(axis=0)  # shape: (rows, cols)
+    med = data.median(axis=0)
     spread = np.maximum(min_spread, nsigma * mad(data, axis=0))
     threshold_img = med + spread
     return (data > threshold_img).rename("labels")
+
+
+def mad(stack, axis=0, scale=1.4826):
+    """Median absolute deviation,
+
+    default is scaled such that +/-MAD covers 50% (between 1/4 and 3/4)
+    of the standard normal cumulative distribution
+    """
+    stack_abs = np.abs(stack)
+    med = median(stack_abs, axis=axis)
+    return scale * median(np.abs(stack_abs - med), axis=axis)
 
 
 @log_runtime
