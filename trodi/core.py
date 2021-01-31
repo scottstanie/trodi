@@ -61,8 +61,8 @@ def label_pixels(
     nsigma=5,
     min_spread=0.5,
 ):
-    stack_abs = np.abs(stack)
-    median_img = stack_abs.median(axis=0)
+    stack_abs = np.abs(stack)  # shape: (ndates, rows, cols)
+    median_img = stack_abs.median(axis=0)  # shape: (rows, cols)
     spread = np.maximum(min_spread, nsigma * mad(stack_abs))
     threshold_img = median_img + spread
 
@@ -74,13 +74,12 @@ def label_scenes(
     nsigma=5,
     min_spread=0.5,
 ):
-    # out shape: (ndates, 1, 1)
-    stack_var = np.var(stack, axis=(1, 2), keepdims=True)
+    stack_var = np.var(stack, axis=(1, 2), keepdims=True)  # out shape: (ndates, 1, 1)
 
-    median_var = stack_var.median(axis=0)
-    spread = np.maximum(min_spread, nsigma * mad(stack_var, axis=0))
+    median_var = stack_var.median(axis=0)  # (1, 1)
+    spread = np.maximum(min_spread, nsigma * mad(stack_var, axis=0))  # (1, 1)
     threshold_var = median_var + spread
-    return (stack_var > threshold_var).squeeze()
+    return (stack_var > threshold_var).squeeze()  # shape: (ndates, )
 
 
 @log_runtime
@@ -89,7 +88,7 @@ def create_averages(
     ext=".unw",
     rsc_file=None,
     deramp=True,
-    outfile="average_slcs.nc",
+    avg_file="average_slcs.nc",
     overwrite=False,
     normalize_time=False,
     band=2,
@@ -107,7 +106,7 @@ def create_averages(
             filename of .rsc resource file, if loading binary files like snaphu outputs
         deramp (bool):
             remove a linear ramp from unwrapped igrams when averaging
-        outfile (str):
+        avg_file (str):
             name of output file to save stack
         overwrite (bool):
             clobber current output file, if exists
@@ -121,9 +120,9 @@ def create_averages(
     """
     import netCDF4 as nc
 
-    if os.path.exists(outfile) and not overwrite:
-        log.info("{} exists, not overwriting.")
-        return outfile
+    if os.path.exists(avg_file) and not overwrite:
+        log.info("{} exists, not overwriting.".format(avg_file))
+        return avg_file
 
     log.info("Searching for igrams in {} with extention {}".format(search_path, ext))
     ifg_date_list = utils.find_igrams(directory=search_path, ext=ext)
@@ -134,7 +133,7 @@ def create_averages(
     log.info("Found {} igrams, {} unique SAR dates".format(nigrams, ndates))
 
     utils.create_empty_nc_stack(
-        outfile,
+        avg_file,
         date_list=sar_date_list,
         rsc_file=rsc_file,
         gdal_file=unw_file_list[0],
@@ -142,11 +141,11 @@ def create_averages(
         overwrite=overwrite,
     )
 
-    f = nc.Dataset(outfile, mode="r+")
+    f = nc.Dataset(avg_file, mode="r+")
     ds = f["igrams"]
     _, rows, cols = ds.shape
 
-    # # TODO: make ignore into a CLI option
+    # # TODO: make ignore into a CLI option? or just require moving bad ones
     # sar_date_list, ifg_date_list = utils.ignore_geo_dates(
     #     sar_date_list,
     #     ifg_date_list,
@@ -160,11 +159,6 @@ def create_averages(
     # mask_igram_date_list = utils.load_intlist_from_h5(mask_fname)
 
     for (idx, gdate) in enumerate(sar_date_list):
-        # outfile = "avg_" + gdate.strftime("%Y%m%d") + ".tif"
-        # if os.path.exists(outfile) and not overwrite:
-        # print(f"{outfile} exists: skipping")
-        # continue
-
         cur_unws = [
             (f, date_pair)
             for (date_pair, f) in zip(ifg_date_list, unw_file_list)
@@ -199,4 +193,4 @@ def create_averages(
 
     # Close to save it
     f.close()
-    return outfile
+    return avg_file
