@@ -7,11 +7,10 @@ Label outliers on InSAR pixels or whole interferograms
 
 
 ```
-$ time trodi --rsc-file dem.rsc --level pixel
-[01/29 19:01:58] [INFO core.py] Searching for igrams in . with extention .unw
-[01/29 19:01:58] [INFO core.py] Found 5282 igrams, 111 unique SAR dates
-[01/29 19:01:58] [INFO utils.py] Making dimensions and variables
-[01/29 19:01:58] [INFO utils.py] Writing dummy data for igrams
-[01/29 19:01:58] [INFO core.py] Averaging 81 igrams for 2014-11-04 (1 out of 111)
-[01/29 19:02:01] [INFO core.py] Averaging 83 igrams for 2014-11-28 (2 out of 111)
+$ trodi -o labels_scene.nc --level scene
+[01/31 10:20:41] [INFO core.py] average_slcs.nc exists, not overwriting.
+[01/31 10:20:41] [INFO logger.py] Total elapsed time for create_averages : 0.00 minutes (0.00 seconds)
+[01/31 10:20:42] [INFO core.py] Computing 5 sigma outlier labels at scene level.
+[01/31 10:20:45] [INFO core.py] Saving outlier labels to labels_scene.nc:/labels
+[01/31 10:20:45] [INFO core.py] Saving data to labels_scene.nc:/data
 ```
