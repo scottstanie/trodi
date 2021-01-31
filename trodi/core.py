@@ -42,22 +42,26 @@ def label_outliers(
         import xarray as xr
 
         stack = xr.open_dataarray(fname)
-
+    log.info("Computing {} sigma outlier labels at {} level.".format(nsigma, level))
     if level == "pixel":
         # Use all pixel absolute values here, shape: (ndates, rows, cols)
-        stack_data = np.abs(stack)
+        stack_data = np.abs(stack).rename("data")
         labels = label(stack_data, nsigma=nsigma, min_spread=min_spread)
     elif level == "scene":
         # Use just scene-level variance, shape: (ndates, 1, 1)
-        stack_data = np.var(stack, axis=(1, 2), keepdims=True)
+        stack_data = np.var(stack, axis=(1, 2), keepdims=True).rename("data")
         labels = label(stack_data, nsigma=nsigma, min_spread=min_spread)
+        # Add squeeze for the scene-level case, dont need lat/lon dims
+        labels, stack_data = labels.squeeze(), stack_data.squeeze()
     else:
         raise ValueError("`level` must be 'pixel' or 'scene'")
 
     if outfile:
-        log.info("Saving outlier labels and variances to " + outfile)
-        labels.to_netcdf(outfile, group="labels", mode="a")
-        stack_data.to_netcdf(outfile, group="data", mode="a")
+        log.info("Saving outlier labels to {}:/labels".format(outfile))
+        labels.to_netcdf(outfile)
+        log.info("Saving data to {}:/data".format(outfile))
+        # Add squeeze for the scene-level case, dont need lat/lon dims
+        stack_data.to_netcdf(outfile, mode="a")
     return labels
 
 
@@ -69,7 +73,7 @@ def label(
     med = data.median(axis=0)  # shape: (rows, cols)
     spread = np.maximum(min_spread, nsigma * mad(data, axis=0))
     threshold_img = med + spread
-    return data > threshold_img
+    return (data > threshold_img).rename("labels")
 
 
 @log_runtime
