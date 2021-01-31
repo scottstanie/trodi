@@ -44,42 +44,32 @@ def label_outliers(
         stack = xr.open_dataarray(fname)
 
     if level == "pixel":
-        labels = label_pixels(stack, nsigma=nsigma, min_spread=min_spread)
+        # Use all pixel absolute values here, shape: (ndates, rows, cols)
+        stack_data = np.abs(stack)
+        labels = label(stack_data, nsigma=nsigma, min_spread=min_spread)
     elif level == "scene":
-        labels = label_scenes(stack, nsigma=nsigma, min_spread=min_spread)
+        # Use just scene-level variance, shape: (ndates, 1, 1)
+        stack_data = np.var(stack, axis=(1, 2), keepdims=True)
+        labels = label(stack_data, nsigma=nsigma, min_spread=min_spread)
     else:
         raise ValueError("`level` must be 'pixel' or 'scene'")
 
     if outfile:
-        log.info("Saving outlier labels to " + outfile)
-        labels.to_netcdf(outfile)
+        log.info("Saving outlier labels and variances to " + outfile)
+        labels.to_netcdf(outfile, group="labels", mode="a")
+        stack_data.to_netcdf(outfile, group="data", mode="a")
     return labels
 
 
-def label_pixels(
-    stack,
+def label(
+    data,
     nsigma=5,
     min_spread=0.5,
 ):
-    stack_abs = np.abs(stack)  # shape: (ndates, rows, cols)
-    median_img = stack_abs.median(axis=0)  # shape: (rows, cols)
-    spread = np.maximum(min_spread, nsigma * mad(stack_abs))
-    threshold_img = median_img + spread
-
-    return stack_abs > threshold_img
-
-
-def label_scenes(
-    stack,
-    nsigma=5,
-    min_spread=0.5,
-):
-    stack_var = np.var(stack, axis=(1, 2), keepdims=True)  # out shape: (ndates, 1, 1)
-
-    median_var = stack_var.median(axis=0)  # (1, 1)
-    spread = np.maximum(min_spread, nsigma * mad(stack_var, axis=0))  # (1, 1)
-    threshold_var = median_var + spread
-    return (stack_var > threshold_var).squeeze()  # shape: (ndates, )
+    med = data.median(axis=0)  # shape: (rows, cols)
+    spread = np.maximum(min_spread, nsigma * mad(data, axis=0))
+    threshold_img = med + spread
+    return data > threshold_img
 
 
 @log_runtime
