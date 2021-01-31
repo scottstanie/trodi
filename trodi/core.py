@@ -41,7 +41,9 @@ def label_outliers(
         stack_data = np.var(stack, axis=(1, 2), keepdims=True)
         labels, threshold = label(stack_data, nsigma=nsigma, min_spread=min_spread)
         # Add squeeze for the scene-level case, dont need lat/lon dims
-        labels, stack_data = labels.squeeze(), stack_data.squeeze()
+        labels = labels.squeeze()
+        stack_data = stack_data.squeeze()
+        threshold = threshold.squeeze()
     else:
         raise ValueError("`level` must be 'pixel' or 'scene'")
 
