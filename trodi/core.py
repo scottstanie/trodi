@@ -34,24 +34,29 @@ def label_outliers(
     log.info("Computing {} sigma outlier labels at {} level.".format(nsigma, level))
     if level == "pixel":
         # Use all pixel absolute values here, shape: (ndates, rows, cols)
-        stack_data = np.abs(stack).rename("data")
-        labels = label(stack_data, nsigma=nsigma, min_spread=min_spread)
+        stack_data = np.abs(stack)
+        labels, threshold = label(stack_data, nsigma=nsigma, min_spread=min_spread)
     elif level == "scene":
         # Use just scene-level variance, shape: (ndates, 1, 1)
-        stack_data = np.var(stack, axis=(1, 2), keepdims=True).rename("data")
-        labels = label(stack_data, nsigma=nsigma, min_spread=min_spread)
+        stack_data = np.var(stack, axis=(1, 2), keepdims=True)
+        labels, threshold = label(stack_data, nsigma=nsigma, min_spread=min_spread)
         # Add squeeze for the scene-level case, dont need lat/lon dims
         labels, stack_data = labels.squeeze(), stack_data.squeeze()
     else:
         raise ValueError("`level` must be 'pixel' or 'scene'")
 
+    # Rename the xarray dataarrays
+    labels = labels.rename("labels")
+    stack_data = stack_data.rename("data")
+    threshold = threshold.rename("threshold")
     if outfile:
         log.info("Saving outlier labels to {}:/labels".format(outfile))
         labels.to_netcdf(outfile)
         log.info("Saving data to {}:/data".format(outfile))
-        # Add squeeze for the scene-level case, dont need lat/lon dims
         stack_data.to_netcdf(outfile, mode="a")
-    return labels
+        log.info("Saving threshold to {}:/threshold".format(outfile))
+        threshold.to_netcdf(outfile, mode="a")
+    return labels, threshold
 
 
 def label(
@@ -61,8 +66,8 @@ def label(
 ):
     med = data.median(axis=0)
     spread = np.maximum(min_spread, nsigma * mad(data, axis=0))
-    threshold_img = med + spread
-    return (data > threshold_img).rename("labels")
+    threshold = med + spread
+    return (data > threshold), threshold
 
 
 def mad(stack, axis=0, scale=1.4826):
