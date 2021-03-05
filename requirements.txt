@@ -1,7 +1,5 @@
-# Add your pinned requirements so that they can be easily installed with:
-# pip install -r requirements.txt
-# Remember to also add them in setup.cfg but unpinned.
-# Example:
-# numpy==1.13.3
+numpy==1.19.2
+xarray==0.16.1
+netCDF4==1.5.4
 # scipy==1.0
 #

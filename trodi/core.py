@@ -7,9 +7,6 @@ Uses the averaged unwrapped igrams per date.
 import os
 import numpy as np
 
-# faster on nans
-from bottleneck import median
-
 from . import utils
 from . import sario
 from .logger import get_log, log_runtime
@@ -26,12 +23,12 @@ def label_outliers(
     level="pixel",
     min_spread=0.5,
 ):
-    # TODO: out of core? worth doing?
     if stack is None:
         import xarray as xr
 
         stack = xr.open_dataarray(fname)
     log.info("Computing {} sigma outlier labels at {} level.".format(nsigma, level))
+
     if level == "pixel":
         # Use all pixel absolute values here, shape: (ndates, rows, cols)
         stack_data = np.abs(stack)
@@ -79,8 +76,8 @@ def mad(stack, axis=0, scale=1.4826):
     of the standard normal cumulative distribution
     """
     stack_abs = np.abs(stack)
-    med = median(stack_abs, axis=axis)
-    return scale * median(np.abs(stack_abs - med), axis=axis)
+    med = np.nanmedian(stack_abs, axis=axis)
+    return scale * np.nanmedian(np.abs(stack_abs - med), axis=axis)
 
 
 @log_runtime
@@ -146,18 +143,10 @@ def create_averages(
     ds = f["igrams"]
     _, rows, cols = ds.shape
 
-    # # TODO: make ignore into a CLI option? or just require moving bad ones
-    # sar_date_list, ifg_date_list = utils.ignore_geo_dates(
-    #     sar_date_list,
-    #     ifg_date_list,
-    #     ignore_file=os.path.join(search_path, "geolist_ignore.txt"),
-    # )
-
-    out_mask = np.zeros((rows, cols)).astype(bool)
-
     # TODO: support masks or not?
     # Get masks for deramping
     # mask_igram_date_list = utils.load_intlist_from_h5(mask_fname)
+    out_mask = np.zeros((rows, cols)).astype(bool)
 
     for (idx, gdate) in enumerate(sar_date_list):
         cur_unws = [
