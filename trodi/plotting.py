@@ -24,12 +24,4 @@ def plot_avgs(fname="average_slcs.nc", stack=None, cmap=None, nimg=9):
         col_wrap=nside,
         cmap=cmap,
         # vmax=np.percentile(ds.data, 95),
-        # cmap="gray",
-        #     cmap="discrete_seismic7",
     )
-    # fig, axes = plt.subplots(nside, nside)
-    # for (avg, ax, fn) in zip(avgs, axes.ravel(), fnames):
-    # axim = ax.imshow(avg, vmin=-vm, vmax=vm, cmap=cmap)
-    # ax.set_title(f"{fn}: {np.var(avg):.2f}")
-    # fig.colorbar(axim, ax=ax)
-    # return fig, axes

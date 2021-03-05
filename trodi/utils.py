@@ -172,7 +172,7 @@ def create_empty_nc_stack(
         overwrite (bool): default = False, will overwrite file if true
     """
     if not outname.endswith(".nc"):
-        raise ValueError(f"{outname} must be an .nc filename")
+        raise ValueError("{} must be an .nc filename".format(outname))
 
     # TODO: allow for radar coordinates and just "x, y" generic?
     lon_arr, lat_arr = get_latlon_arrs(
@@ -203,7 +203,7 @@ def create_empty_nc_stack(
         stack_dim_variable = f.createVariable(
             stack_dim_name, "f4", (stack_dim_name,), zlib=True
         )
-        stack_dim_variable.units = f"days since {date_list[0]}"
+        stack_dim_variable.units = "days since {}".format(date_list[0])
 
         # Write data
         latitudes[:] = lat_arr
@@ -213,7 +213,7 @@ def create_empty_nc_stack(
 
         # Finally, the actual stack
         # stackvar = rootgrp.createVariable("stack/1", "f4", ("date", "lat", "lon"))
-        log.info(f"Writing dummy data for {stack_data_name}")
+        log.info("Writing dummy data for %s", stack_data_name)
         dt = np.dtype(dtype)
         fill_value = 0
 
