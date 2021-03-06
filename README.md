@@ -4,13 +4,17 @@ Label outliers on a stack of interferograms, either at the pixel level, or SAR-s
 
 ## Installation
 
-```bash
-conda install -c scottstanie trodi
-```
 
-or 
+
 ```bash
 pip install trodi
+```
+or
+```
+git clone https://github.com/scottstanie/trodi
+cd trodi 
+conda install numpy xarray netCDF4
+pip install .
 ```
 
 ## Usage
