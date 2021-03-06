@@ -5,7 +5,7 @@ Label outliers on a stack of interferograms, either at the pixel level, or SAR-s
 ## Installation
 
 ```bash
-conda install -c conda-forge trodi
+conda install -c scottstanie trodi
 ```
 
 or 
