@@ -2,6 +2,16 @@
 
 Label outliers on a stack of interferograms, either at the pixel level, or SAR-scene level.
 
+## Installation
+
+```bash
+conda install -c conda-forge trodi
+```
+
+or 
+```bash
+pip install trodi
+```
 
 ## Usage
 
