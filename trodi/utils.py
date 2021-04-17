@@ -138,8 +138,8 @@ def grid(
             rows, cols = src.shape
             max_len = max(rows, cols)
             lon_list, lat_list = src.xy(np.arange(max_len), np.arange(max_len))
-        x = np.arange(lon_list[:cols])
-        y = np.arange(lat_list[:rows])
+        x = np.array(lon_list[:cols])
+        y = np.array(lat_list[:rows])
 
     return np.meshgrid(x, y, sparse=sparse)
 
