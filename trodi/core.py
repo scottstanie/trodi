@@ -148,25 +148,27 @@ def create_averages(
     # mask_igram_date_list = utils.load_intlist_from_h5(mask_fname)
     out_mask = np.zeros((rows, cols)).astype(bool)
 
-    for (idx, gdate) in enumerate(sar_date_list):
+    for (idx, cur_date) in enumerate(sar_date_list):
         cur_unws = [
             (f, date_pair)
             for (date_pair, f) in zip(ifg_date_list, unw_file_list)
-            if gdate in date_pair
+            if cur_date in date_pair
         ]
         log.info(
             "Averaging {} igrams for {} ({} out of {})".format(
-                len(cur_unws), gdate, idx + 1, len(sar_date_list)
+                len(cur_unws), cur_date, idx + 1, len(sar_date_list)
             )
         )
 
         # reset the matrix to all zeros
         out = 0
         for unwf, date_pair in cur_unws:
+            # Since each ifg of (date1, date2) was made by phase2 - phase1,
+            # flip ifg phase so that it's always positive: (other date, cur_date)
+            # otherwise the date's phase was negative in the interferogram
+            flip = -1 if cur_date == date_pair[0] == cur_date else 1
             img = sario.load(unwf, rsc_file=rsc_file, band=band)
-            if normalize_time:
-                img /= (date_pair[1] - date_pair[0]).days
-            out += img
+            out += flip * img
 
             # mask_idx = mask_igram_date_list.index(date_pair)
             # out_mask |= mask_stack[mask_idx]
