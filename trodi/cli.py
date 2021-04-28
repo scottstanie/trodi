@@ -48,6 +48,7 @@ def get_cli_args():
     p.add_argument(
         "--nsigma",
         "-n",
+        type=int,
         help=(
             "Number of sigma_mad deviations away from median to label as outlier"
             " (default=%(default)s)"
