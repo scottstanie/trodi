@@ -88,7 +88,6 @@ def create_averages(
     deramp=True,
     avg_file="average_slcs.nc",
     overwrite=False,
-    normalize_time=False,
     band=2,
     ds_name="igrams",
     **kwargs,
