@@ -85,11 +85,12 @@ def create_averages(
     search_path=".",
     ext=".unw",
     rsc_file=None,
-    deramp=True,
+    deramp_order=2,
     avg_file="average_slcs.nc",
     overwrite=False,
     band=2,
     ds_name="igrams",
+    do_flip=True,
     **kwargs,
 ):
     """Create a NetCDF stack of "average interferograms" for each date
@@ -101,19 +102,19 @@ def create_averages(
             extension name of unwrapped interferograms (default = .unw)
         rsc_file (str):
             filename of .rsc resource file, if loading binary files like snaphu outputs
-        deramp (bool):
-            remove a linear ramp from unwrapped igrams when averaging
+        deramp_order (int):
+            remove a linear (or quadratic ramp) from unwrapped igrams
+            if `deramp_order` = 1 (or 2)
         avg_file (str):
             name of output file to save stack
         overwrite (bool):
             clobber current output file, if exists
-        normalize_time (bool):
-            Divide igram phase by temporal baseline (default = false)
-            true: units = [rad / day], false: units = [rad]
         band (int):
             if using rasterio to load igrams, which image band to load
         ds_name (str):
             Name of the data variable used in the netcdf stack
+        do_flip (bool):
+            Flip the sign of interferograms to always go from (cur date, other date)
     """
     import netCDF4 as nc
 
@@ -165,7 +166,7 @@ def create_averages(
             # Since each ifg of (date1, date2) was made by phase2 - phase1,
             # flip ifg phase so that it's always positive: (other date, cur_date)
             # otherwise the date's phase was negative in the interferogram
-            flip = -1 if cur_date == date_pair[0] == cur_date else 1
+            flip = -1 if do_flip and (cur_date == date_pair[0]) else 1
             img = sario.load(unwf, rsc_file=rsc_file, band=band)
             out += flip * img
 
@@ -174,8 +175,8 @@ def create_averages(
 
         out /= len(cur_unws)
 
-        if deramp:
-            out = remove_ramp(out, deramp_order=1, mask=out_mask)
+        if deramp_order > 0:
+            out = remove_ramp(out, deramp_order=deramp_order, mask=out_mask)
         else:
             out[out_mask] = np.nan
 

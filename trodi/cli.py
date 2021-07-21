@@ -40,10 +40,10 @@ def get_cli_args():
         help="Location to save stack of averaged igrams (default=%(default)s)",
     )
     p.add_argument(
-        "--deramp",
-        action="store_true",
-        default=True,
-        help="remove a linear ramp from phase after averaging (default=%(default)s)",
+        "--deramp-order",
+        default=2,
+        help="Specify order of surface to remove from phase when averaging. "
+        " 1 = linear ramp, 2 = quadratic surface, 0 = no ramp adjustment (default=%(default)s)",
     )
     p.add_argument(
         "--nsigma",
@@ -64,9 +64,12 @@ def get_cli_args():
         help="Overwrite existing averaged files (default=%(default)s)",
     )
     p.add_argument(
-        "--normalize-time",
-        action="store_true",
-        help="Divide igram phase by temporal baseline (default=%(default)s)",
+        "--no-sign-flip",
+        action="store_false",
+        dest="do_flip",
+        help="Skip the sign-flipping that makes interferogram averages have same direction."
+        " Skipping for interferograms will make averages including long term deformation, "
+        "but is useful for, e.g., averaging correlation images."
     )
     return p.parse_args()
 

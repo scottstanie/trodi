@@ -30,7 +30,7 @@ def load(
     """Load a file, either using numpy or rasterio"""
     if rsc_file:
         rsc_data = load_rsc(rsc_file)
-        return load_stacked_img(filename, rsc_data=rsc_data)
+        return load_stacked_img(filename, rsc_data=rsc_data, rows=rows, cols=cols)
     else:
         try:
             import rasterio as rio
@@ -117,7 +117,7 @@ def load_stacked_img(
     if rows is None or cols is None:
         rows, cols = rsc_data["file_length"], rsc_data["width"]
 
-    data = np.fromfile(filename, FLOAT_32_LE)
+    data = np.fromfile(filename, dtype)
 
     first = data.reshape((rows, 2 * cols))[:, :cols]
     second = data.reshape((rows, 2 * cols))[:, cols:]
