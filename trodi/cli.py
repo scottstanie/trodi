@@ -64,12 +64,20 @@ def get_cli_args():
         help="Overwrite existing averaged files (default=%(default)s)",
     )
     p.add_argument(
+        "--max-temporal-baseline",
+        type=int,
+        help=(
+            "Maximum temporal baseline to use when averaging interferograms. (default=%(default)s)"
+        ),
+        default=800,
+    )
+    p.add_argument(
         "--no-sign-flip",
         action="store_false",
         dest="do_flip",
         help="Skip the sign-flipping that makes interferogram averages have same direction."
         " Skipping for interferograms will make averages including long term deformation, "
-        "but is useful for, e.g., averaging correlation images."
+        "but is useful for, e.g., averaging correlation images.",
     )
     return p.parse_args()
 

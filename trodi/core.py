@@ -90,6 +90,7 @@ def create_averages(
     overwrite=False,
     band=2,
     ds_name="igrams",
+    max_temporal_baseline=800,
     do_flip=True,
     **kwargs,
 ):
@@ -115,6 +116,8 @@ def create_averages(
             Name of the data variable used in the netcdf stack
         do_flip (bool):
             Flip the sign of interferograms to always go from (cur date, other date)
+        max_temporal_baseline (int):
+            Maximum temporal baseline to use for averaging, in days.
     """
     import netCDF4 as nc
 
@@ -152,7 +155,10 @@ def create_averages(
         cur_unws = [
             (f, date_pair)
             for (date_pair, f) in zip(ifg_date_list, unw_file_list)
-            if cur_date in date_pair
+            if (
+                cur_date in date_pair
+                and _temp_baseline(date_pair) <= max_temporal_baseline
+            )
         ]
         log.info(
             "Averaging {} igrams for {} ({} out of {})".format(
@@ -186,3 +192,7 @@ def create_averages(
     # Close to save it
     f.close()
     return avg_file
+
+
+def _temp_baseline(date_pair):
+    return abs(date_pair[1] - date_pair[0])
