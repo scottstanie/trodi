@@ -195,4 +195,4 @@ def create_averages(
 
 
 def _temp_baseline(date_pair):
-    return abs(date_pair[1] - date_pair[0])
+    return abs(date_pair[1] - date_pair[0]).days
