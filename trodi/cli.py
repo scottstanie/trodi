@@ -42,6 +42,7 @@ def get_cli_args():
     p.add_argument(
         "--deramp-order",
         default=2,
+        type=int,
         help="Specify order of surface to remove from phase when averaging. "
         " 1 = linear ramp, 2 = quadratic surface, 0 = no ramp adjustment (default=%(default)s)",
     )

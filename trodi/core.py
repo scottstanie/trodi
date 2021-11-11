@@ -184,6 +184,7 @@ def create_averages(
         if deramp_order > 0:
             out = remove_ramp(out, deramp_order=deramp_order, mask=out_mask)
         else:
+            out -= out.mean()
             out[out_mask] = np.nan
 
         # Write the single layer out
