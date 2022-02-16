@@ -36,7 +36,7 @@ def get_cli_args():
     )
     p.add_argument(
         "--avg-file",
-        default="average_slcs.nc",
+        default="average_ifgs.nc",
         help="Location to save stack of averaged igrams (default=%(default)s)",
     )
     p.add_argument(

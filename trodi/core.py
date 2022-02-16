@@ -86,12 +86,13 @@ def create_averages(
     ext=".unw",
     rsc_file=None,
     deramp_order=2,
-    avg_file="average_slcs.nc",
+    avg_file="average_ifgs.nc",
     overwrite=False,
     band=2,
-    ds_name="igrams",
+    ds_name="average_ifgs",
     max_temporal_baseline=800,
     do_flip=True,
+    mask=None,
     **kwargs,
 ):
     """Create a NetCDF stack of "average interferograms" for each date
@@ -143,13 +144,14 @@ def create_averages(
     )
 
     f = nc.Dataset(avg_file, mode="r+")
-    ds = f["igrams"]
+    ds = f[ds_name]
     _, rows, cols = ds.shape
 
     # TODO: support masks or not?
     # Get masks for deramping
     # mask_igram_date_list = utils.load_intlist_from_h5(mask_fname)
-    out_mask = np.zeros((rows, cols)).astype(bool)
+    if mask is None:
+        mask = np.zeros((rows, cols)).astype(bool)
 
     for (idx, cur_date) in enumerate(sar_date_list):
         cur_unws = [
@@ -177,15 +179,15 @@ def create_averages(
             out += flip * img
 
             # mask_idx = mask_igram_date_list.index(date_pair)
-            # out_mask |= mask_stack[mask_idx]
+            # mask |= mask_stack[mask_idx]
 
         out /= len(cur_unws)
 
         if deramp_order > 0:
-            out = remove_ramp(out, deramp_order=deramp_order, mask=out_mask)
+            out = remove_ramp(out, deramp_order=deramp_order, mask=mask)
         else:
             out -= out.mean()
-            out[out_mask] = np.nan
+            out[mask] = np.nan
 
         # Write the single layer out
         ds[idx, :, :] = out

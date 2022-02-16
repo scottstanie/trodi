@@ -151,7 +151,7 @@ def create_empty_nc_stack(
     gdal_file=None,
     dtype="float32",
     stack_dim_name="date",
-    stack_data_name="igrams",
+    stack_data_name="average_ifgs",
     lat_units="degrees north",
     lon_units="degrees east",
     overwrite=False,
@@ -196,8 +196,8 @@ def create_empty_nc_stack(
         # Could make this unlimited to add to it later?
         latitudes = f.createVariable("lat", "f4", ("lat",), zlib=True)
         longitudes = f.createVariable("lon", "f4", ("lon",), zlib=True)
-        latitudes.units = "degrees north"
-        longitudes.units = "degrees east"
+        latitudes.units = lat_units
+        longitudes.units = lon_units
 
         f.createDimension(stack_dim_name, depth)
         stack_dim_variable = f.createVariable(
