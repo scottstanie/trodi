@@ -9,12 +9,18 @@ Label outliers on a stack of interferograms, either at the pixel level, or SAR-s
 ```bash
 pip install trodi
 ```
-or
+or (to make an editable installation)
 ```
 git clone https://github.com/scottstanie/trodi
-cd trodi 
-conda install numpy xarray netCDF4
-pip install .
+cd trodi
+pip install -e .
+```
+If you're using a conda environment
+```
+conda install --file requirements.txt
+# Or if you are using mamba for quicker installation: https://github.com/mamba-org/mamba 
+# mamba install --file requirements.txt
+pip install -e .
 ```
 
 ## Usage
@@ -38,12 +44,16 @@ $ trodi --outfile labels_scene.nc --level scene
 [03/04 22:37:17] [INFO core.py] Saving threshold to labels_scene.nc:/threshold
 ```
 
+To get pixel-level labels:
+```
+$ trodi --level pixel --outfile labels_pixel.nc 
+```
 
 With the outliers recorded, we can read these in Python with xarray, (or h5py, or a NetCDF reader):
 
 ```python
 import xarray as xr
->>> ds = xr.open_dataset("labels_scene.nc")
+>>> ds = xr.open_dataset("labels.nc")
 >>> ds
 <xarray.Dataset>
 Dimensions:    (date: 5)
@@ -63,7 +73,7 @@ Coordinates:
 
 The `labels` dataset gives a `True` for any SAR dates determined to be an outlier.
 
-In MATLAB, reading the results would use `ncread`:
+In MATLAB, you can read the results using `ncread`:
 
 ```matlab
 >> ncread('labels_scene.nc', 'labels')
@@ -81,30 +91,31 @@ ans =
 ```
 We see that for this dummy example, the threshold was 0.8059 on the average interferograms.
 
-#### Full options:
 
+### Example on real dataset
+
+You can also test this out on an [example dataset](https://mintpy.readthedocs.io/en/latest/demo_dataset/) provided by MintPy and ARIA.
+
+Area: San Francisco Bay, California, USA
+Data: Sentinel-1 A/B descending track 42 during May 2015 - March 2020 (114 acquisitoins; Zenodo)
+Size: ~2.7 GB
+
+```bash
+wget https://zenodo.org/record/4265413/files/SanFranSenDT42.tar.xz
+tar -xvJf SanFranSenDT42.tar.xz
+cd SanFranSenDT42
 ```
-$ trodi --help
-usage: trodi [-h] [--level {pixel,scene}] [--ext EXT] [--search-path SEARCH_PATH] [--outfile OUTFILE] [--avg-file AVG_FILE] [--deramp] [--nsigma NSIGMA] [--rsc-file RSC_FILE]
-             [--overwrite] [--normalize-time]
 
-'--level pixel' means individual pixels for each SAR date are labeled (good for larger scenes). '--level scene' means whole SAR images are labeled (good for smaller scenes).
-For scene level labeling, the variance of each average interferogram is used.
+The unwrapped interferograms are in the `unwrappedPhase` folder.
+They are provided as binary files with VRT files to load using GDAL (so you need to have GDAL installed, e.g. `mamba install gdal`) where the first band is the phase.
 
-optional arguments:
-  -h, --help            show this help message and exit
-  --level {pixel,scene}
-                        Level at which to label outliers. (default=pixel).
-  --ext EXT             filename extension of unwrapped igrams to average (default=.unw)
-  --search-path SEARCH_PATH, -p SEARCH_PATH
-                        location of igram files. (default=.)
-  --outfile OUTFILE, -o OUTFILE
-                        Location to save final labels (default=labels.nc)
-  --avg-file AVG_FILE   Location to save stack of averaged igrams (default=average_slcs.nc)
-  --deramp              remove a linear ramp from phase after averaging (default=True)
-  --nsigma NSIGMA, -n NSIGMA
-                        Number of sigma_mad deviations away from median to label as outlier (default=5)
-  --rsc-file RSC_FILE   If using ROI_PAC .rsc files, location of .rsc file
-  --overwrite           Overwrite existing averaged files (default=False)
-  --normalize-time      Divide igram phase by temporal baseline (default=False)
-  ```
+Note that there is a watermask provided, but it uses "0"s to indicate where the water is. We'll add the `--mask-is-zero` option to flip that to numpy masking conventions.
+
+```bash
+trodi --search-path unwrappedPhase/ --ext .vrt --band 1  --max-temporal 250 --mask-files mask/watermask.msk --mask-is-zero
+```
+
+You can check the `average_ifgs.nc` file for each day's noise estimate:
+![](docs/example-average-ifg.png)
+
+See `trodi --help` for full option list.
