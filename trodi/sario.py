@@ -24,6 +24,7 @@ def load(
     rows=None,
     cols=None,
     band=1,
+    mask_nodata=True,
     **kwargs,
 ):
     """Load a file, either using numpy or rasterio
@@ -40,6 +41,8 @@ def load(
         Manually specify number of cols of image
     band : int
         For gdal, specify the band of the image to load (Default value = 1)
+    mask_nodata : bool
+        If True, convert out gdal-indicated nodata values as nans (Default value = True)
     **kwargs :
         
 
@@ -59,6 +62,10 @@ def load(
 
         ds = gdal.Open(filename)
         image = ds.GetRasterBand(band).ReadAsArray()
+        # Get the nodata value, and set it to nan
+        nodata = ds.GetRasterBand(band).GetNoDataValue()
+        if nodata is not None:
+            image[image == nodata] = np.nan
         ds = None
         return image
 

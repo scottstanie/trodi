@@ -101,6 +101,11 @@ def get_cli_args():
         ),
     )
     p.add_argument(
+        "--no-data",
+        type=int,
+        help="Indicate a nodata value to mask in all interferograms (default=%(default)s)",
+    )
+    p.add_argument(
         "--no-sign-flip",
         action="store_false",
         dest="do_flip",
