@@ -119,6 +119,7 @@ def create_averages(
             Flip the sign of interferograms to always go from (cur date, other date)
         max_temporal_baseline (int):
             Maximum temporal baseline to use for averaging, in days.
+        mask_files (list):
     """
     import netCDF4 as nc
 
@@ -150,7 +151,9 @@ def create_averages(
     # TODO: support masks or not?
     # Get masks for deramping
     # mask_igram_date_list = utils.load_intlist_from_h5(mask_fname)
-    if mask is None:
+    if mask_files:
+        mask = sario.load_mask(mask_files)
+    else:
         mask = np.zeros((rows, cols)).astype(bool)
 
     for (idx, cur_date) in enumerate(sar_date_list):

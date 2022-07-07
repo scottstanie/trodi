@@ -70,7 +70,12 @@ def get_cli_args():
         help=(
             "Maximum temporal baseline to use when averaging interferograms. (default=%(default)s)"
         ),
-        default=800,
+        default=400,
+    )
+    p.add_argument(
+        "--mask-files",
+        nargs="+",
+        help="List of binary mask files (e.g. water mask) to apply when creating avergae interferograms",
     )
     p.add_argument(
         "--no-sign-flip",

@@ -32,12 +32,14 @@ def load(
         return load_stacked_img(filename, rsc_data=rsc_data, rows=rows, cols=cols)
     else:
         try:
-            import rasterio as rio
+            from osgeo import gdal
         except ImportError:
-            raise ValueError("Need to `conda install rasterio` to load gdal-readable")
+            raise ValueError("Need to `conda install gdal` to load gdal-readable")
 
-        with rio.open(filename) as src:
-            return src.read(band)
+        ds = gdal.Open(filename)
+        image = ds.GetRasterBand(band).ReadAsArray()
+        ds = None
+        return image
 
 
 def load_rsc(filename, lower=False, **kwargs):
@@ -82,7 +84,6 @@ def load_rsc(filename, lower=False, **kwargs):
 
 def load_stacked_img(
     filename,
-    arr=None,
     rows=None,
     cols=None,
     rsc_data=None,
@@ -124,3 +125,17 @@ def load_stacked_img(
         return np.stack((first, second), axis=0)
     else:
         return second
+
+
+def load_mask(mask_files, rsc_file=None):
+    """Create one mask from a list of mask files
+
+    Args:
+        mask_files (list): list of mask files to load
+    Returns:
+        ndarray: dtype=bool, the mask
+    """
+    mask = np.ma.nomask
+    for mask_file in mask_files:
+        mask = np.logical_or(mask, load(mask_file, band=1, rsc_file=rsc_file).astype(np.bool))
+    return mask

@@ -6,7 +6,7 @@ nice formatting out of the box.
 
 Usage:
 
-    from apertools.log import get_log
+    from logger import get_log
     logger = get_log()
 
     logger.info("Something happened")
@@ -14,8 +14,6 @@ Usage:
     logger.error("Something bad happened")
     logger.critical("Something just awful happened")
     logger.debug("Extra printing we often don't need to see.")
-    # Custom output for this module:
-    logger.success("Something great happened: highlight this success")
 """
 import logging
 import time
