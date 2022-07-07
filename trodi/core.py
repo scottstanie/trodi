@@ -50,7 +50,7 @@ def label_outliers(
     if stack is None:
         import xarray as xr
 
-        stack = xr.open_dataarray(fname)
+        stack = xr.open_dataarray(fname, engine="h5netcdf")
     log.info("Computing {} sigma outlier labels at {} level.".format(nsigma, level))
 
     if level == "pixel":
@@ -74,11 +74,11 @@ def label_outliers(
     threshold = threshold.rename("threshold")
     if outfile:
         log.info("Saving outlier labels to {}:/labels".format(outfile))
-        labels.to_netcdf(outfile)
+        labels.to_netcdf(outfile, engine="h5netcdf")
         log.info("Saving data to {}:/data".format(outfile))
-        stack_data.to_netcdf(outfile, mode="a")
+        stack_data.to_netcdf(outfile, mode="a", engine="h5netcdf")
         log.info("Saving threshold to {}:/threshold".format(outfile))
-        threshold.to_netcdf(outfile, mode="a")
+        threshold.to_netcdf(outfile, mode="a", engine="h5netcdf")
     return labels, threshold
 
 
