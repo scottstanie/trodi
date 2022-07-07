@@ -1,4 +1,5 @@
 import collections
+from multiprocessing.sharedctypes import Value
 
 import numpy as np
 
@@ -65,7 +66,10 @@ def load(
         # Get the nodata value, and set it to nan
         nodata = ds.GetRasterBand(band).GetNoDataValue()
         if nodata is not None:
-            image[image == nodata] = np.nan
+            try:
+                image[image == nodata] = np.nan
+            except ValueError:  # non-float image type, dont mask
+                pass
         ds = None
         return image
 
