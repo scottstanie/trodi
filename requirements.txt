@@ -2,4 +2,5 @@ numpy>=1.19.0
 xarray>=0.16.1
 h5py>=3.3
 h5netcdf
+cftime
 
