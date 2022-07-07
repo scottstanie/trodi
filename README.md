@@ -56,7 +56,7 @@ To get pixel-level labels:
 $ trodi --level pixel --outfile labels_pixel.nc 
 ```
 
-With the outliers recorded, we can read these in Python with xarray, (or h5py, or a NetCDF reader):
+With the labels recorded, we can read these in Python with xarray, (or h5py, or a NetCDF reader):
 
 ```python
 import xarray as xr
@@ -78,7 +78,7 @@ Coordinates:
   * date     (date) datetime64[ns] 2015-02-08 2015-03-28 ... 2015-06-20
 ```
 
-The `labels` dataset gives a `True` for any SAR dates determined to be an outlier.
+The `labels` dataset gives a `True` for any SAR dates determined to be significantly noisier than the other acquisitions.
 
 In MATLAB, you can read the results using `ncread`:
 
@@ -98,8 +98,9 @@ ans =
 ```
 We see that for this dummy example, the threshold was 0.8059 on the average interferograms.
 
+You can check the `average_ifgs.nc` file on the labeled dates to see what the estimated atmosphere is.
 
-### Example on real dataset
+# Example on real dataset
 
 You can also test this out on an [example dataset](https://mintpy.readthedocs.io/en/latest/demo_dataset/) provided by MintPy and ARIA.
 
