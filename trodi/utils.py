@@ -5,7 +5,7 @@ import time
 from collections.abc import Iterable
 from glob import glob
 
-import h5netcdf
+import h5netcdf.legacyapi as nc
 import numpy as np
 
 from . import sario
@@ -265,7 +265,7 @@ def create_empty_nc_stack(
     stack_dim_arr = to_datetimes(date_list)
 
     log.info("Making dimensions and variables")
-    with h5netcdf.File(outname, "w", clobber=overwrite) as f:
+    with nc.Dataset(outname, "w", clobber=overwrite) as f:
         f.history = "Created " + time.ctime(time.time())
 
         f.createDimension("lat", rows)

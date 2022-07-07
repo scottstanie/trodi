@@ -181,7 +181,7 @@ def create_averages(
     -------
     str: name of output file
     """
-    import h5netcdf
+    import h5netcdf.legacyapi as nc
 
     if os.path.exists(avg_file) and not overwrite:
         log.info("{} exists, not overwriting.".format(avg_file))
@@ -204,7 +204,7 @@ def create_averages(
         overwrite=overwrite,
     )
 
-    f = h5netcdf.File(avg_file, mode="r+")
+    f = nc.Dataset(avg_file, mode="r+")
     ds = f[ds_name]
     _, rows, cols = ds.shape
 
