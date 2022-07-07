@@ -13,15 +13,12 @@ def get_cli_args():
     """ """
     p = argparse.ArgumentParser(description=description)
     p.add_argument(
-        "--level",
-        default="pixel",
-        choices=["pixel", "scene"],
-        help=("Level at which to label outliers. (default=%(default)s).\n"),
-    )
-    p.add_argument(
-        "--ext",
-        default=".unw",
-        help="filename extension of unwrapped igrams to average (default=%(default)s)",
+        "--input-files",
+        "-i",
+        help=(
+            "Provide the list of input interferogram filenames in a text file."
+            "Alternate to `--search-path`."
+        ),
     )
     p.add_argument(
         "--search-path",
@@ -30,15 +27,27 @@ def get_cli_args():
         help="location of igram files. (default=%(default)s)",
     )
     p.add_argument(
-        "--input-files",
-        "-i",
-        help="Provide the list of input interferogram filenames in a text file. Alternate to `--search-path`.",
+        "--ext",
+        default=".unw",
+        help="filename extension of unwrapped igrams to average (default=%(default)s)",
+    )
+    p.add_argument(
+        "--band",
+        type=int,
+        default=1,
+        help="If using GDAL to load igrams, specify which band represents unwrapped phase (default=%(default)s)",
     )
     p.add_argument(
         "--outfile",
         "-o",
         default="labels.nc",
         help="Location to save final labels (default=%(default)s)",
+    )
+    p.add_argument(
+        "--level",
+        default="scene",
+        choices=["pixel", "scene"],
+        help=("Level at which to label outliers. (default=%(default)s).\n"),
     )
     p.add_argument(
         "--avg-file",

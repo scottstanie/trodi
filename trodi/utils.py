@@ -5,6 +5,7 @@ import time
 from collections.abc import Iterable
 from glob import glob
 
+import cftime
 import h5netcdf.legacyapi as nc
 import numpy as np
 
@@ -265,7 +266,8 @@ def create_empty_nc_stack(
     stack_dim_arr = to_datetimes(date_list)
 
     log.info("Making dimensions and variables")
-    with nc.Dataset(outname, "w", clobber=overwrite) as f:
+    mode = "w" if overwrite else "x"
+    with nc.Dataset(outname, mode) as f:
         f.history = "Created " + time.ctime(time.time())
 
         f.createDimension("lat", rows)
@@ -285,7 +287,7 @@ def create_empty_nc_stack(
         # Write data
         latitudes[:] = lat_arr
         longitudes[:] = lon_arr
-        d2n = nc.date2num(stack_dim_arr, units=stack_dim_variable.units)
+        d2n = cftime.date2num(stack_dim_arr, units=stack_dim_variable.units)
         stack_dim_variable[:] = d2n
 
         # Finally, the actual stack

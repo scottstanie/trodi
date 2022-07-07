@@ -53,6 +53,7 @@ def load(
     else:
         try:
             from osgeo import gdal
+            gdal.UseExceptions()
         except ImportError:
             raise ValueError("Need to `conda install gdal` to load gdal-readable")
 
