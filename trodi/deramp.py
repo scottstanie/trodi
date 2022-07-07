@@ -3,11 +3,11 @@ import numpy as np
 
 def matrix_indices(shape, flatten=True):
     """Returns a pair of vectors for all indices of a 2D array
-
     Convenience function to help remembed mgrid syntax
 
     Example:
-        >>> a = np.arange(12).reshape((4, 3))
+
+    >>> a = np.arange(12).reshape((4, 3))
         >>> print(a)
         [[ 0  1  2]
          [ 3  4  5]
@@ -34,13 +34,23 @@ def remove_ramp(z, deramp_order=1, mask=np.ma.nomask, copy=False):
 
     Used to remove noise artifacts from unwrapped interferograms
 
-    Args:
-        z (ndarray): 2D array, interpreted as heights
-        deramp_order (int): degree of surface estimation
-            deramp_order = 1 removes linear ramp, deramp_order = 2 fits quadratic surface
+    Parameters
+    ----------
+    z : ndarray
+        2D array, interpreted as heights
+    deramp_order : int
+        degree of surface estimation
+        deramp_order = 1 removes linear ramp, deramp_order = 2 fits quadratic surface (Default value = 1)
+    mask :
+         (Default value = np.ma.nomask)
+    copy :
+         (Default value = False)
 
-    Returns:
-        ndarray: flattened 2D array with estimated surface removed
+    Returns
+    -------
+    ndarray
+        flattened 2D array with estimated surface removed
+
     """
     z_masked = z.copy() if copy else z
     # Make a version of the image with nans in masked places
@@ -56,18 +66,27 @@ def estimate_ramp(z, deramp_order):
 
     Ignores pixels that have nan values
 
-    Args:
-        z (ndarray): 2D array, interpreted as heights
-        deramp_order (int): degree of surface estimation
-            deramp_order = 1 removes linear ramp, deramp_order = 2 fits quadratic surface
+    Parameters
+    ----------
+    z : ndarray
+        2D array, interpreted as heights
+    deramp_order : int
+        degree of surface estimation
+        deramp_order = 1 removes linear ramp, deramp_order = 2 fits quadratic surface
+    deramp_order : int
+        degree of surface estimation
+        deramp_order = 1 removes linear ramp, deramp_order = 2 fits quadratic surface
         deramp_order (int)
 
-    Returns:
-        ndarray: the estimated coefficients of the surface
-            For deramp_order = 1, it will be 3 numbers, a, b, c from
-                 ax + by + c = z
-            For deramp_order = 2, it will be 6:
-                f + ax + by + cxy + dx^2 + ey^2
+    Returns
+    -------
+    ndarray
+        the estimated coefficients of the surface
+        For deramp_order = 1, it will be 3 numbers, a, b, c from
+        ax + by + c = z
+        For deramp_order = 2, it will be 6:
+        f + ax + by + cxy + dx^2 + ey^2
+
     """
     if deramp_order > 2:
         raise ValueError("Order only implemented for 1 and 2")
@@ -87,12 +106,12 @@ def estimate_ramp(z, deramp_order):
 
     elif deramp_order == 2:
         A = np.c_[
-            np.ones(xidxs.shape), xidxs, yidxs, xidxs * yidxs, xidxs ** 2, yidxs ** 2
+            np.ones(xidxs.shape), xidxs, yidxs, xidxs * yidxs, xidxs**2, yidxs**2
         ]
         # coeffs will be 6 elements for the quadratic
         coeffs, _, _, _ = np.linalg.lstsq(A[good_idxs], zflat[good_idxs], rcond=None)
         yy, xx = matrix_indices(z.shape, flatten=True)
-        idx_matrix = np.c_[np.ones(xx.shape), xx, yy, xx * yy, xx ** 2, yy ** 2]
+        idx_matrix = np.c_[np.ones(xx.shape), xx, yy, xx * yy, xx**2, yy**2]
         z_fit = np.dot(idx_matrix, coeffs).reshape(z.shape)
 
     return z_fit

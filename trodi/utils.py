@@ -18,15 +18,23 @@ DATE_FMT = "%Y%m%d"
 def find_igrams(directory=".", ext=".int", parse=True, filename=None):
     """Reads the list of igrams to return dates of images as a tuple
 
-    Args:
-        directory (str): path to the igram directory
-        ext (str): file extension when searching a directory
-        parse (bool): output as parsed datetime tuples. False returns the filenames
-        filename (str): name of a file with SAR filenames separated by newlines
+    Parameters
+    ----------
+    directory : str
+        path to the igram directory (Default value = ".")
+    ext : str
+        file extension when searching a directory (Default value = ".int")
+    parse : bool
+        output as parsed datetime tuples. False returns the filenames (Default value = True)
+    filename : str
+        name of a file with SAR filenames separated by newlines (Default value = None)
 
-    Returns:
+    Returns
+    -------
+    
+    list: list of tuples of datetime objects
         tuple(date, date) of (early, late) dates for all igrams (if parse=True)
-            if parse=False: returns list[str], filenames of the igrams
+        if parse=False: returns list[str], filenames of the igrams
 
     """
     if filename is not None:
@@ -42,12 +50,12 @@ def find_igrams(directory=".", ext=".int", parse=True, filename=None):
     if parse:
         igram_fnames = [os.path.split(f)[1] for f in igram_file_list]
         date_pairs = [intname.strip(ext).split("_")[:2] for intname in igram_fnames]
-        return parse_intlist_strings(date_pairs, ext=ext)
+        return _parse_intlist_strings(date_pairs, ext=ext)
     else:
         return igram_file_list
 
 
-def parse_intlist_strings(date_pairs, ext=".int"):
+def _parse_intlist_strings(date_pairs, ext=".int"):
     # If we passed filename YYYYmmdd_YYYYmmdd.int
     if not date_pairs:
         return []
@@ -62,15 +70,50 @@ def parse_intlist_strings(date_pairs, ext=".int"):
 def dates_from_igrams(igram_list):
     """Takes a list of [(reference, secondary),...] igram date pairs
     and returns the list of unique dates of SAR images used to form them
+
+    Parameters
+    ----------
+    igram_list :
+        
+
+    Returns
+    -------
+
     """
     return sorted(list(set(itertools.chain(*igram_list))))
 
 
 def _parse(datestr):
+    """
+
+    Parameters
+    ----------
+    datestr :
+        
+
+    Returns
+    -------
+
+    """
     return datetime.datetime.strptime(datestr, DATE_FMT).date()
 
 
 def get_latlon_arrs(h5_filename=None, rsc_file=None, gdal_file=None):
+    """
+
+    Parameters
+    ----------
+    h5_filename :
+         (Default value = None)
+    rsc_file :
+         (Default value = None)
+    gdal_file :
+         (Default value = None)
+
+    Returns
+    -------
+
+    """
     if rsc_file is not None:
         lon_arr, lat_arr = grid(**sario.load_rsc(rsc_file), sparse=True)
     elif gdal_file is not None:
@@ -95,22 +138,40 @@ def grid(
 ):
     """Takes sizes and spacing info, creates a grid of values
 
-    Args:
-        rows (int): number of rows
-        cols (int): number of cols
-        y_step (float): spacing between rows
-        x_step (float): spacing between cols
-        y_first (float): starting location of first row at top
-        x_first (float): starting location of first col on left
-        sparse (bool): Optional (default False). Passed through to
-            np.meshgrid to optionally conserve memory
+    Parameters
+    ----------
+    rows : int
+        number of rows (Default value = None)
+    cols : int
+        number of cols (Default value = None)
+    y_step : float
+        spacing between rows (Default value = None)
+    x_step : float
+        spacing between cols (Default value = None)
+    y_first : float
+        starting location of first row at top (Default value = None)
+    x_first : float
+        starting location of first col on left (Default value = None)
+    sparse : bool
+        Optional (default False). Passed through to
+        np.meshgrid to optionally conserve memory
+    width :
+         (Default value = None)
+    file_length :
+         (Default value = None)
+    fname :
+         (Default value = None)
+    **kwargs :
+        
 
-    Returns:
-        tuple[ndarray, ndarray]: the XX, YY grids of longitudes and lats
+    Returns
+    -------
+    tuple[ndarray, ndarray]
+        the XX, YY grids of longitudes and lats
+        Examples:
 
-    Examples:
     >>> test_grid_data = {'cols': 2, 'rows': 3, 'x_first': -155.0, 'x_step': 0.01,\
-'y_first': 19.5, 'y_step': -0.2}
+    'y_first': 19.5, 'y_step': -0.2}
     >>> lons, lats = grid(**test_grid_data)
     >>> np.set_printoptions(legacy="1.13")
     >>> print(lons)
@@ -159,18 +220,33 @@ def create_empty_nc_stack(
 ):
     """Creates skeleton of .nc stack without writing stack data
 
-    Args:
-        outname (str): name of .nc output file to save
-        date_list (list[datetime.date]): if layers of stack correspond to dates of SAR images
-        rsc_file (str): .rsc (resource) file containing the desired output lat/lon grid data
-        gdal_file (str): instead of .rsc, and example GDAL-readable file in desired coordinates
-        dtype: default="float32", the numpy datatype of the stack data
-        stack_dim_name (str): default = "date". Name of the 3rd dimension of the stack
-            (Dimensions are (stack_dim_name, lat, lon) )
-        stack_data_name (str): default="stack", name of the data variable in the file
-        lat_units (str): default = "degrees north",
-        lon_units (str): default = "degrees east",
-        overwrite (bool): default = False, will overwrite file if true
+    Parameters
+    ----------
+    outname : str
+        name of .nc output file to save
+    date_list : list[datetime.date]
+        if layers of stack correspond to dates of SAR images (Default value = None)
+    rsc_file : str
+        .rsc (resource) file containing the desired output lat/lon grid data (Default value = None)
+    gdal_file : str
+        instead of .rsc, and example GDAL-readable file in desired coordinates (Default value = None)
+    dtype :
+        default="float32", the numpy datatype of the stack data
+    stack_dim_name : str
+        default = "date". Name of the 3rd dimension of the stack
+        (Dimensions are (stack_dim_name, lat, lon) )
+    stack_data_name : str
+        default="stack", name of the data variable in the file
+    lat_units : str
+        default = "degrees north",
+    lon_units : str
+        default = "degrees east",
+    overwrite : bool
+        default = False, will overwrite file if true
+
+    Returns
+    -------
+
     """
     if not outname.endswith(".nc"):
         raise ValueError("{} must be an .nc filename".format(outname))
@@ -228,6 +304,17 @@ def create_empty_nc_stack(
 
 
 def to_datetimes(date_list):
+    """
+
+    Parameters
+    ----------
+    date_list :
+        
+
+    Returns
+    -------
+
+    """
     return [datetime.datetime(*d.timetuple()[:6]) for d in date_list]
 
 

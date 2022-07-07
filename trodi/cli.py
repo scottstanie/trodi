@@ -10,6 +10,7 @@ For scene level labeling, the variance of each average interferogram is used.
 
 
 def get_cli_args():
+    """ """
     p = argparse.ArgumentParser(description=description)
     p.add_argument(
         "--level",
@@ -27,6 +28,11 @@ def get_cli_args():
         "-p",
         default=".",
         help="location of igram files. (default=%(default)s)",
+    )
+    p.add_argument(
+        "--input-files",
+        "-i",
+        help="Provide the list of input interferogram filenames in a text file. Alternate to `--search-path`.",
     )
     p.add_argument(
         "--outfile",
@@ -75,7 +81,7 @@ def get_cli_args():
     p.add_argument(
         "--mask-files",
         nargs="+",
-        help="List of binary mask files (e.g. water mask) to apply when creating avergae interferograms",
+        help="List of binary mask files (e.g. water mask) to apply when creating average interferograms",
     )
     p.add_argument(
         "--no-sign-flip",
@@ -89,6 +95,7 @@ def get_cli_args():
 
 
 def average_and_label():
+    """ """
     args = get_cli_args()
     core.create_averages(**vars(args))
     core.label_outliers(

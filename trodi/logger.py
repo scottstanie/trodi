@@ -22,6 +22,21 @@ from logging import Formatter
 
 
 def get_log(debug=False, name=__file__, verbose=False):
+    """
+
+    Parameters
+    ----------
+    debug : bool
+         (Default value = False)
+    name : str
+         (Default value = __file__)
+    verbose : bool
+         (Default value = False)
+
+    Returns
+    -------
+
+    """
     logger = logging.getLogger(name)
     return format_log(logger, debug=debug, verbose=verbose)
 
@@ -52,16 +67,32 @@ logger = get_log()
 
 
 def log_runtime(f):
-    """
-    Logs how long a decorated function takes to run
-    Args:
-        f (function): The function to wrap
-    Retruns:
-        function: The wrapped function
+    """Logs how long a decorated function takes to run
+
+    Parameters
+    ----------
+    f : function
+        The function to wrap
+        Retruns:
+    function :
+        The wrapped function
     """
     # pass function's docstring through
     @wraps(f)
     def wrapper(*args, **kwargs):
+        """
+
+        Parameters
+        ----------
+        *args :
+            
+        **kwargs :
+            
+
+        Returns
+        -------
+
+        """
         t1 = time.time()
         result = f(*args, **kwargs)
         t2 = time.time()

@@ -26,7 +26,27 @@ def load(
     band=1,
     **kwargs,
 ):
-    """Load a file, either using numpy or rasterio"""
+    """Load a file, either using numpy or rasterio
+
+    Parameters
+    ----------
+    filename : str
+        Name of file to load
+    rsc_file : int
+         (Default value = None)
+    rows : int
+        Manually specify number of rows of image
+    cols :
+        Manually specify number of cols of image
+    band : int
+        For gdal, specify the band of the image to load (Default value = 1)
+    **kwargs :
+        
+
+    Returns
+    -------
+    ndarray : image data
+    """
     if rsc_file:
         rsc_data = load_rsc(rsc_file)
         return load_stacked_img(filename, rsc_data=rsc_data, rows=rows, cols=cols)
@@ -45,26 +65,32 @@ def load(
 def load_rsc(filename, lower=False, **kwargs):
     """Loads and parses the .rsc file
 
-    Args:
-        filename (str) path to either the or .rsc file.
-            Function will add .rsc to path if passed .dem file
-        lower (bool): make keys of the dict lowercase
+    Parameters
+    ----------
+    lower : bool
+        make keys of the dict lowercase (Default value = False)
+    filename :
+        
+    **kwargs :
+        
 
-    Returns:
-        dict: .rsc file parsed out
+    Returns
+    -------
+    dict
+        .rsc file parsed out
+        example file:
+        WIDTH         10801
+        FILE_LENGTH   7201
+        X_FIRST       -157.0
+        Y_FIRST       21.0
+        X_STEP        0.000277777777
+        Y_STEP        -0.000277777777
+        X_UNIT        degrees
+        Y_UNIT        degrees
+        Z_OFFSET      0
+        Z_SCALE       1
+        PROJECTION    LL
 
-    example file:
-    WIDTH         10801
-    FILE_LENGTH   7201
-    X_FIRST       -157.0
-    Y_FIRST       21.0
-    X_STEP        0.000277777777
-    Y_STEP        -0.000277777777
-    X_UNIT        degrees
-    Y_UNIT        degrees
-    Z_OFFSET      0
-    Z_SCALE       1
-    PROJECTION    LL
     """
 
     # Use OrderedDict so that upsample_dem_rsc creates with same ordering as old
@@ -92,27 +118,40 @@ def load_stacked_img(
     **kwargs,
 ):
     """Helper function to load .unw and .cor files from snaphu output
-
+    
     Format is two stacked matrices:
         [[first], [second]] where the first "cols" number of floats
         are the first matrix, next "cols" are second, etc.
     Also called BIL, Band Interleaved by Line
     See http://webhelp.esri.com/arcgisdesktop/9.3/index.cfm?topicname=BIL,_BIP,_and_BSQ_raster_files
     for explantion
-
+    
     For .unw height files, the first is amplitude, second is phase (unwrapped)
     For .cc correlation files, first is amp, second is correlation (0 to 1)
 
-    Args:
-        filename (str): path to the file to open
-        rows (int): manually pass number of rows (overrides rsc/ann data)
-        cols (int): manually pass number of cols (overrides rsc/ann data)
-        rsc_data (dict): output from load_rsc, gives width of file
-        return_amp (bool): flag to request the amplitude data to be returned
+    Parameters
+    ----------
+    filename :
+        str
+    rows :
+        int (Default value = None)
+    cols :
+        int (Default value = None)
+    rsc_data :
+        dict (Default value = None)
+    return_amp :
+        bool (Default value = False)
+    dtype :
+         (Default value = FLOAT_32_LE)
+    **kwargs :
+        
 
-    Returns:
+    Returns
+    -------
+    type
         ndarray: dtype=float32, the second matrix (height, correlation, ...) parsed
         if return_amp == True, returns two ndarrays stacked along axis=0
+
     """
     if rows is None or cols is None:
         rows, cols = rsc_data["file_length"], rsc_data["width"]
@@ -130,10 +169,18 @@ def load_stacked_img(
 def load_mask(mask_files, rsc_file=None):
     """Create one mask from a list of mask files
 
-    Args:
-        mask_files (list): list of mask files to load
-    Returns:
-        ndarray: dtype=bool, the mask
+    Parameters
+    ----------
+    mask_files :
+        
+    rsc_file :
+         (Default value = None)
+
+    Returns
+    -------
+    ndarray
+        dtype=bool, the mask
+
     """
     mask = np.ma.nomask
     for mask_file in mask_files:

@@ -4,13 +4,22 @@ import numpy as np
 def plot_avgs(fname="average_slcs.nc", stack=None, cmap=None, nimg=9):
     """Plot a fact grid of average interferograms.
 
-    Args:
-        fname (str, optional): Name of computed average interferogram file. 
-            Defaults to "average_slcs.nc".
-        stack (xr.Dataset, optional): Alternative to `fname`, pass the average Dataset. 
-            Defaults to None.
-        cmap (_type_, optional): Colormap for plotting.
-        nimg (int, optional): Number of total images to plot. Defaults to 9.
+    Parameters
+    ----------
+    fname : str
+        Name of computed average interferogram file.
+        Defaults to "average_slcs.nc".
+    stack : xr.Dataset
+        Alternative to `fname`, pass the average Dataset.
+        Defaults to None.
+    cmap : _type_
+        Colormap for plotting. (Default value = None)
+    nimg : int
+        Number of total images to plot. Defaults to 9.
+
+    Returns
+    -------
+
     """
     import xarray as xr
 

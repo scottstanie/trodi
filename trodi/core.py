@@ -23,6 +23,30 @@ def label_outliers(
     level="pixel",
     min_spread=0.5,
 ):
+    """
+
+    Parameters
+    ----------
+    fname : str
+        Filename of average interferogram (Default value = None)
+    stack : xr.Dataset
+        xr.Dataset containing the average, alternative to `fname` (Default value = None)
+    outfile : str
+        Name of output file to save (Default value = "labels.nc")
+    nsigma : int
+        Cutoff level to label outliers (Default value = 5)
+    level : str
+        Type of outlier labeling to use.
+            "pixel" runs on each pixel individually
+            "scene" takes each image variance as the input
+            (Default value = "pixel")
+    min_spread : float
+        minimum value to use for calculating variances (Default value = 0.5)
+
+    Returns
+    -------
+        labels, threshold: The labeled xr.Dataset and the threshold used to label outliers
+    """
     if stack is None:
         import xarray as xr
 
@@ -63,6 +87,23 @@ def label(
     nsigma=5,
     min_spread=0.5,
 ):
+    """Label outliers using the average interferograms
+
+    Parameters
+    ----------
+    data : xr.DataArray (or np.ndarray)
+
+
+    nsigma : int
+         (Default value = 5)
+    min_spread : float
+         (Default value = 0.5)
+
+    Returns
+    -------
+    labels : xr.DataArray
+    threshold : xr.DataArray
+    """
     med = data.median(axis=0)
     spread = np.maximum(min_spread, nsigma * mad(data, axis=0))
     threshold = med + spread
@@ -72,8 +113,18 @@ def label(
 def mad(stack, axis=0, scale=1.4826):
     """Median absolute deviation,
 
-    default is scaled such that +/-MAD covers 50% (between 1/4 and 3/4)
+    Default `scale` is such that +/-MAD covers 50% (between 1/4 and 3/4)
     of the standard normal cumulative distribution
+
+    Parameters
+    ----------
+    stack : xr.DataArray, or np.ndarray
+
+    axis : int, optional
+        axis along which to compute the MAD (Default value = 0)
+    scale : float
+        Multiplier to use for std dev (Default value = 1.4826)
+
     """
     stack_abs = np.abs(stack)
     med = np.nanmedian(stack_abs, axis=axis)
@@ -98,20 +149,37 @@ def create_averages(
 ):
     """Create a NetCDF stack of "average interferograms" for each date
 
-    Args:
-        search_path (str): directory to find igrams
-        ext (str): extension name of unwrapped interferograms (default = .unw)
-        rsc_file (str): filename of .rsc resource file, if loading binary files like snaphu outputs
-        deramp_order (int): remove a linear (or quadratic ramp) from unwrapped igrams
-            if `deramp_order` = 1 (or 2)
-        avg_file (str): name of output file to save stack
-        overwrite (bool): clobber current output file, if exists
-        band (int): if using rasterio to load igrams, which image band to load
-        ds_name (str): Name of the data variable used in the netcdf stack
-        do_flip (bool): Flip the sign of interferograms to always go from (cur date, other date)
-        max_temporal_baseline (int): Maximum temporal baseline to use for averaging, in days.
-        mask (np.ndarray): binary mask to apply to all loaded interferograms
-        mask_files (list): List of files to use as masks for the stack.
+    Parameters
+    ----------
+    search_path : str
+        directory to find igrams (Default value = ".")
+    ext : str
+        extension name of unwrapped interferograms (default = .unw)
+    rsc_file : str
+        filename of .rsc resource file, if loading binary files like snaphu outputs (Default value = None)
+    deramp_order : int
+        remove a linear (or quadratic ramp) from unwrapped igrams
+        if `deramp_order` = 1 (or 2) (Default value = 2)
+    avg_file : str
+        name of output file to save stack (Default value = "average_ifgs.nc")
+    overwrite : bool
+        clobber current output file, if exists (Default value = False)
+    band : int
+        if using rasterio to load igrams, which image band to load (Default value = 2)
+    ds_name : str
+        Name of the data variable used in the netcdf stack (Default value = "average_ifgs")
+    do_flip : bool
+        Flip the sign of interferograms to always go from (cur date, other date) (Default value = True)
+    max_temporal_baseline : int
+        Maximum temporal baseline to use for averaging, in days. (Default value = 800)
+    mask : np.ndarray
+        binary mask to apply to all loaded interferograms (Default value = None)
+    mask_files : list
+        List of files to use as masks for the stack. (Default value = [])
+
+    Returns
+    -------
+    str: name of output file
     """
     import h5netcdf
 
@@ -192,4 +260,5 @@ def create_averages(
 
 
 def _temp_baseline(date_pair):
+    """Calculate the temporal baseline of a date pair"""
     return abs(date_pair[1] - date_pair[0]).days
