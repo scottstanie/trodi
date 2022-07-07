@@ -17,18 +17,10 @@ Usage:
     # Custom output for this module:
     logger.success("Something great happened: highlight this success")
 """
-from functools import wraps
 import logging
 import time
-
-try:
-    from colorlog import ColoredFormatter
-
-    COLORS = True
-except ImportError:
-    from logging import Formatter
-
-    COLORS = False
+from functools import wraps
+from logging import Formatter
 
 
 def get_log(debug=False, name=__file__, verbose=False):
@@ -38,22 +30,9 @@ def get_log(debug=False, name=__file__, verbose=False):
 
 def format_log(logger, debug=False, verbose=False):
     log_level = logging.DEBUG if debug else logging.INFO
-    log_colors = {
-        "DEBUG": "blue",
-        "INFO": "black",
-        "WARNING": "red",
-        "ERROR": "red",
-        "CRITICAL": "black,bg_red",
-    }
 
-    if COLORS:
-        format_ = "[%(asctime)s] [%(log_color)s%(levelname)s %(filename)s%(reset)s] %(message)s%(reset)s"
-        formatter = ColoredFormatter(
-            format_, datefmt="%m/%d %H:%M:%S", log_colors=log_colors
-        )
-    else:
-        format_ = "[%(asctime)s] [%(levelname)s %(filename)s] %(message)s"
-        formatter = Formatter(format_, datefmt="%m/%d %H:%M:%S")
+    format_ = "[%(asctime)s] [%(levelname)s %(filename)s] %(message)s"
+    formatter = Formatter(format_, datefmt="%m/%d %H:%M:%S")
 
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)

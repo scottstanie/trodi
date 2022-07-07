@@ -1,6 +1,6 @@
 import argparse
-from . import core
 
+from . import core
 
 description = """
 '--level pixel' means individual pixels for each SAR date are labeled (good for larger scenes).

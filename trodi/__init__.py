@@ -1,2 +1,2 @@
 # -*- coding: utf-8 -*-
-from .core import label_outliers, create_averages  # noqa
+from .core import create_averages, label_outliers  # noqa

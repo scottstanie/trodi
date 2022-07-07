@@ -5,12 +5,12 @@ Create labels of outlier interferogram pixels.
 Uses the averaged unwrapped igrams per date.
 """
 import os
+
 import numpy as np
 
-from . import utils
-from . import sario
-from .logger import get_log, log_runtime
+from . import sario, utils
 from .deramp import remove_ramp
+from .logger import get_log, log_runtime
 
 log = get_log()
 

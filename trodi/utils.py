@@ -1,14 +1,15 @@
-import os
 import datetime
+import itertools
+import os
 import time
 from collections.abc import Iterable
 from glob import glob
-import numpy as np
-import netCDF4 as nc
-import itertools
 
-from .logger import get_log
+import h5netcdf
+import numpy as np
+
 from . import sario
+from .logger import get_log
 
 log = get_log()
 DATE_FMT = "%Y%m%d"
@@ -188,7 +189,7 @@ def create_empty_nc_stack(
     stack_dim_arr = to_datetimes(date_list)
 
     log.info("Making dimensions and variables")
-    with nc.Dataset(outname, "w", clobber=overwrite) as f:
+    with h5netcdf.File(outname, "w", clobber=overwrite) as f:
         f.history = "Created " + time.ctime(time.time())
 
         f.createDimension("lat", rows)

@@ -2,7 +2,6 @@ import collections
 
 import numpy as np
 
-
 FLOAT_32_LE = np.dtype("<f4")
 RSC_KEY_TYPES = [
     ("width", int),
