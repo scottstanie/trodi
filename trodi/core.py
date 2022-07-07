@@ -93,35 +93,27 @@ def create_averages(
     max_temporal_baseline=800,
     do_flip=True,
     mask=None,
+    mask_files=[],
     **kwargs,
 ):
     """Create a NetCDF stack of "average interferograms" for each date
 
     Args:
-        search_path (str):
-            directory to find igrams
-        ext (str):
-            extension name of unwrapped interferograms (default = .unw)
-        rsc_file (str):
-            filename of .rsc resource file, if loading binary files like snaphu outputs
-        deramp_order (int):
-            remove a linear (or quadratic ramp) from unwrapped igrams
+        search_path (str): directory to find igrams
+        ext (str): extension name of unwrapped interferograms (default = .unw)
+        rsc_file (str): filename of .rsc resource file, if loading binary files like snaphu outputs
+        deramp_order (int): remove a linear (or quadratic ramp) from unwrapped igrams
             if `deramp_order` = 1 (or 2)
-        avg_file (str):
-            name of output file to save stack
-        overwrite (bool):
-            clobber current output file, if exists
-        band (int):
-            if using rasterio to load igrams, which image band to load
-        ds_name (str):
-            Name of the data variable used in the netcdf stack
-        do_flip (bool):
-            Flip the sign of interferograms to always go from (cur date, other date)
-        max_temporal_baseline (int):
-            Maximum temporal baseline to use for averaging, in days.
-        mask_files (list):
+        avg_file (str): name of output file to save stack
+        overwrite (bool): clobber current output file, if exists
+        band (int): if using rasterio to load igrams, which image band to load
+        ds_name (str): Name of the data variable used in the netcdf stack
+        do_flip (bool): Flip the sign of interferograms to always go from (cur date, other date)
+        max_temporal_baseline (int): Maximum temporal baseline to use for averaging, in days.
+        mask (np.ndarray): binary mask to apply to all loaded interferograms
+        mask_files (list): List of files to use as masks for the stack.
     """
-    import netCDF4 as nc
+    import h5netcdf
 
     if os.path.exists(avg_file) and not overwrite:
         log.info("{} exists, not overwriting.".format(avg_file))
@@ -144,22 +136,21 @@ def create_averages(
         overwrite=overwrite,
     )
 
-    f = nc.Dataset(avg_file, mode="r+")
+    f = h5netcdf.File(avg_file, mode="r+")
     ds = f[ds_name]
     _, rows, cols = ds.shape
 
-    # TODO: support masks or not?
     # Get masks for deramping
     # mask_igram_date_list = utils.load_intlist_from_h5(mask_fname)
-    if mask_files:
-        mask = sario.load_mask(mask_files)
-    else:
+    if mask is None:
         mask = np.zeros((rows, cols)).astype(bool)
+    if mask_files:
+        mask = np.logical_or(mask, sario.load_mask(mask_files))
 
     for (idx, cur_date) in enumerate(sar_date_list):
         cur_unws = [
-            (f, date_pair)
-            for (date_pair, f) in zip(ifg_date_list, unw_file_list)
+            (fname, date_pair)
+            for (date_pair, fname) in zip(ifg_date_list, unw_file_list)
             if (
                 cur_date in date_pair
                 and _temp_baseline(date_pair) <= max_temporal_baseline
