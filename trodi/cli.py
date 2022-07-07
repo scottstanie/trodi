@@ -90,7 +90,15 @@ def get_cli_args():
     p.add_argument(
         "--mask-files",
         nargs="+",
-        help="List of binary mask files (e.g. water mask) to apply when creating average interferograms",
+        help="List of binary mask files (e.g. water mask) to apply when creating average interferograms.",
+    )
+    p.add_argument(
+        "--mask-is-zero",
+        action="store_true",
+        help=(
+            "Indicate that the areas to mask are 0 in the files given by `--mask-files`. "
+            "The default is the numpy convention where True (1) is masked."
+        ),
     )
     p.add_argument(
         "--no-sign-flip",
