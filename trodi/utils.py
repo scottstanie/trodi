@@ -205,7 +205,7 @@ def grid(
         ds = None
 
         # lon_list, lat_list = src.xy(np.arange(max_len), np.arange(max_len))
-        x = ulx + np.arange(width) * xres
+        x = ulx + np.arange(cols) * xres
         y = uly + np.arange(rows) * yres
 
     return np.meshgrid(x, y, sparse=sparse)
