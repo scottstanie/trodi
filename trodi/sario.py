@@ -167,7 +167,7 @@ def load_stacked_img(
         return second
 
 
-def load_mask(mask_files, rsc_file=None):
+def load_mask(mask_files, rsc_file=None, mask_is_zero=False):
     """Create one mask from a list of mask files
 
     Parameters
@@ -185,5 +185,8 @@ def load_mask(mask_files, rsc_file=None):
     """
     mask = np.ma.nomask
     for mask_file in mask_files:
-        mask = np.logical_or(mask, load(mask_file, band=1, rsc_file=rsc_file).astype(np.bool))
+        cur_mask = load(mask_file, band=1, rsc_file=rsc_file).astype(np.bool)
+        if mask_is_zero:
+            cur_mask = ~cur_mask
+        mask = np.logical_or(mask, cur_mask)
     return mask

@@ -145,6 +145,7 @@ def create_averages(
     do_flip=True,
     mask=None,
     mask_files=[],
+    mask_is_zero=False,
     **kwargs,
 ):
     """Create a NetCDF stack of "average interferograms" for each date
@@ -176,6 +177,9 @@ def create_averages(
         binary mask to apply to all loaded interferograms (Default value = None)
     mask_files : list
         List of files to use as masks for the stack. (Default value = [])
+    mask_is_zero : bool
+        If True, areas in the `mask_files` which are 0 are the places to ignore. (Default value = False.)
+        Note that `mask_is_zero=False` means that True/1s are the mask areas (matching numpy masking defaults).
 
     Returns
     -------
@@ -213,7 +217,7 @@ def create_averages(
     if mask is None:
         mask = np.zeros((rows, cols)).astype(bool)
     if mask_files:
-        mask = np.logical_or(mask, sario.load_mask(mask_files))
+        mask = np.logical_or(mask, sario.load_mask(mask_files, mask_is_zero=mask_is_zero))
 
     for (idx, cur_date) in enumerate(sar_date_list):
         cur_unws = [
