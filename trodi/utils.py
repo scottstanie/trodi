@@ -191,18 +191,22 @@ def grid(
         y = np.linspace(y_first, y_first + (rows - 1) * y_step, rows).reshape((rows, 1))
     else:
         try:
-            import rasterio as rio
+            from osgeo import gdal
         except ImportError:
             raise ValueError(
-                "Need to `conda install rasterio` to pass gdal-readable files to `grid`"
+                "Need to `conda install gdal` to pass gdal-readable files to `grid`"
             )
 
-        with rio.open(fname) as src:
-            rows, cols = src.shape
-            max_len = max(rows, cols)
-            lon_list, lat_list = src.xy(np.arange(max_len), np.arange(max_len))
-        x = np.array(lon_list[:cols])
-        y = np.array(lat_list[:rows])
+        # get size of the raster
+        ds = gdal.Open(fname)
+        cols = ds.RasterXSize
+        rows = ds.RasterYSize
+        ulx, xres, _, uly, _, yres  = ds.GetGeoTransform()
+        ds = None
+
+        # lon_list, lat_list = src.xy(np.arange(max_len), np.arange(max_len))
+        x = ulx + np.arange(width) * xres
+        y = uly + np.arange(rows) * yres
 
     return np.meshgrid(x, y, sparse=sparse)
 

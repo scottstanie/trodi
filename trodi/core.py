@@ -166,7 +166,7 @@ def create_averages(
     overwrite : bool
         clobber current output file, if exists (Default value = False)
     band : int
-        if using rasterio to load igrams, which image band to load (Default value = 2)
+        if using gdal to load igrams, which image band to load (Default value = 2)
     ds_name : str
         Name of the data variable used in the netcdf stack (Default value = "average_ifgs")
     do_flip : bool

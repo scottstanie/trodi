@@ -4,12 +4,19 @@ Label outliers on a stack of interferograms, either at the pixel level, or SAR-s
 
 ## Installation
 
-
+Recommended to have a conda environment set up.
 
 ```bash
 pip install trodi
 ```
-or (to make an editable installation)
+Note that you need to install GDAL if you are not using simple binary files with a ROI_PAC ".rsc" file describing the dimensions:
+```
+conda install gdal
+# Or if you are using mamba for quicker installation (https://github.com/mamba-org/mamba), mamba install gdal
+```
+
+
+To make an editable installation
 ```
 git clone https://github.com/scottstanie/trodi
 cd trodi
@@ -18,16 +25,16 @@ pip install -e .
 If you're using a conda environment
 ```
 conda install --file requirements.txt
-# Or if you are using mamba for quicker installation: https://github.com/mamba-org/mamba 
 # mamba install --file requirements.txt
 pip install -e .
 ```
 
 ## Usage
 
+If you have a set of unwrapped interferograms (".unw" files) in a folder called "igrams",  
 
 ```
-$ trodi --outfile labels_scene.nc --level scene
+$ trodi --search-path igrams 
 [03/04 22:37:15] [INFO core.py] Searching for igrams in igrams/ with extention .unw
 [03/04 22:37:15] [INFO core.py] Found 9 igrams, 5 unique SAR dates
 [03/04 22:37:15] [INFO utils.py] Making dimensions and variables
@@ -111,8 +118,14 @@ They are provided as binary files with VRT files to load using GDAL (so you need
 
 Note that there is a watermask provided, but it uses "0"s to indicate where the water is. We'll add the `--mask-is-zero` option to flip that to numpy masking conventions.
 
-```bash
-trodi --search-path unwrappedPhase/ --ext .vrt --band 1  --max-temporal 250 --mask-files mask/watermask.msk --mask-is-zero
+```
+$ trodi --search-path unwrappedPhase/ --ext .vrt --band 1  --max-temporal 250 --mask-files mask/watermask.msk --mask-is-zero
+[07/07 10:30:27] [INFO core.py] Searching for igrams in unwrappedPhase/ with extention .vrt
+[07/07 10:30:27] [INFO core.py] Found 505 igrams, 114 unique SAR dates
+[07/07 10:30:27] [INFO utils.py] Making dimensions and variables
+[07/07 10:30:27] [INFO utils.py] Writing dummy data for average_ifgs
+[07/07 10:30:27] [INFO core.py] Averaging 3 igrams for 2015-05-12 (1 out of 114)
+...
 ```
 
 You can check the `average_ifgs.nc` file for each day's noise estimate:
