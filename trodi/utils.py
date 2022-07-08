@@ -169,20 +169,23 @@ def grid(
     -------
     tuple[ndarray, ndarray]
         the XX, YY grids of longitudes and lats
-        Examples:
+
+    Examples
+    --------
 
     >>> test_grid_data = {'cols': 2, 'rows': 3, 'x_first': -155.0, 'x_step': 0.01,\
     'y_first': 19.5, 'y_step': -0.2}
-    >>> lons, lats = grid(**test_grid_data)
     >>> np.set_printoptions(legacy="1.13")
+    >>> lons, lats = grid(**test_grid_data, sparse=False)
     >>> print(lons)
     [[-155.   -154.99]
      [-155.   -154.99]
      [-155.   -154.99]]
+    >>> lons, lats = grid(**test_grid_data)
     >>> print(lats)
-    [[ 19.5  19.5]
-     [ 19.3  19.3]
-     [ 19.1  19.1]]
+    [[ 19.5]
+     [ 19.3]
+     [ 19.1]]
     """
     if fname is None:
         rows = rows or file_length

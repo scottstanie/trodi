@@ -13,8 +13,8 @@ install-edit:
 	pip install -e .
 
 test:
-	@echo "Running doctests and unittests: nose must be installed"
-	nosetests -v --with-doctest
+	@echo "Running doctests and unittests: pytest must be installed"
+	pytest --doctest-modules
 
 clean:
 	rm -f *.so

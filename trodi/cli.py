@@ -90,7 +90,7 @@ def get_cli_args():
     p.add_argument(
         "--mask-files",
         nargs="+",
-        help="List of binary mask files (e.g. water mask) to apply when creating average interferograms.",
+        help="List of binary mask files (e.g. water mask) to apply when creating average ifgs.",
     )
     p.add_argument(
         "--mask-is-zero",
@@ -101,7 +101,7 @@ def get_cli_args():
         ),
     )
     p.add_argument(
-        "--no-data",
+        "--nodata",
         type=int,
         help="Indicate a nodata value to mask in all interferograms (default=%(default)s)",
     )
