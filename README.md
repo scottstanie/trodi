@@ -5,14 +5,19 @@ Label outliers on a stack of interferograms, either at the pixel level, or SAR-s
 ## Installation
 
 Recommended to have a conda environment set up.
+```bash
+conda install -c conda-forge trodi
+# Or if you are using mamba for quicker installation (https://github.com/mamba-org/mamba), 
+# mamba install -c conda-forge trodi
+```
 
+Also available on pip:
 ```bash
 pip install trodi
 ```
-Note that you need to install GDAL if you are not using simple binary files with a ROI_PAC ".rsc" file describing the dimensions:
+but note that you need to install GDAL if you are not using simple binary files with a ROI_PAC ".rsc" file describing the dimensions:
 ```
 conda install gdal
-# Or if you are using mamba for quicker installation (https://github.com/mamba-org/mamba), mamba install gdal
 ```
 
 
